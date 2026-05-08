@@ -136,26 +136,31 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                 child: Column(
                   children: [
                     // Search Section
-                    Padding(
+                    Container(
+                      color: AppTheme.background, // Color(0xFF021140)
                       padding: const EdgeInsets.all(16.0),
                       child: TextField(
                         controller: _searchController,
-                        style: const TextStyle(color: AppTheme.background),
-                        decoration: const InputDecoration(
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
                           labelText: 'Pesquisar lista...',
-                          labelStyle: TextStyle(color: AppTheme.background),
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.1),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppTheme.background),
+                            borderSide: const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: AppTheme.primary,
                               width: 2,
                             ),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.search,
-                            color: AppTheme.background,
+                            color: Colors.white70,
                           ),
                         ),
                         onChanged: (v) {
@@ -165,109 +170,113 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                         },
                       ),
                     ),
-                    Divider(
-                      color: AppTheme.background.withValues(alpha: 0.2),
+                    const Divider(
+                      color: AppTheme.secondary,
                       height: 1,
+                      thickness: 1,
                     ),
 
                     // Lists View
                     Expanded(
-                      child: Consumer<ShoppingProvider>(
-                        builder: (context, provider, child) {
-                          final lists = provider.allLists.where((l) {
-                            return l.name.toLowerCase().contains(_searchQuery);
-                          }).toList();
+                      child: Container(
+                        color: Colors.white, // Fundo branco para a área de listagem
+                        child: Consumer<ShoppingProvider>(
+                          builder: (context, provider, child) {
+                            final lists = provider.allLists.where((l) {
+                              return l.name.toLowerCase().contains(_searchQuery);
+                            }).toList();
 
-                          if (lists.isEmpty) {
-                            return Center(
-                              child: Text(
-                                'Nenhuma lista encontrada.',
-                                style: TextStyle(
-                                  color: AppTheme.background.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-
-                          return ListView.separated(
-                            itemCount: lists.length,
-                            separatorBuilder: (context, index) => Divider(
-                              height: 1,
-                              color: AppTheme.background.withValues(alpha: 0.1),
-                            ),
-                            itemBuilder: (context, index) {
-                              final list = lists[index];
-                              final isCurrent =
-                                  list.id == provider.currentList.id;
-
-                              return ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                leading: CircleAvatar(
-                                  backgroundColor: isCurrent
-                                      ? AppTheme.primary
-                                      : AppTheme.secondary.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                  child: Icon(
-                                    Icons.shopping_cart,
-                                    color: isCurrent
-                                        ? Colors.white
-                                        : AppTheme.background,
-                                  ),
-                                ),
-                                title: Text(
-                                  list.name,
-                                  style: TextStyle(
-                                    fontWeight: isCurrent
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: AppTheme.background,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  '${list.items.length} itens',
+                            if (lists.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'Nenhuma lista encontrada.',
                                   style: TextStyle(
                                     color: AppTheme.background.withValues(
-                                      alpha: 0.7,
+                                      alpha: 0.5,
                                     ),
                                   ),
                                 ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        color: AppTheme.background,
-                                      ),
-                                      onPressed: () => _showRenameDialog(list),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete_outline,
-                                        color: AppTheme.danger,
-                                      ),
-                                      onPressed: provider.allLists.length > 1
-                                          ? () => _showDeleteDialog(list)
-                                          : null,
-                                    ),
-                                  ],
-                                ),
-                                onTap: () {
-                                  provider.switchList(list.id);
-                                  context.go('/');
-                                },
                               );
-                            },
-                          );
-                        },
+                            }
+
+                            return ListView.separated(
+                              itemCount: lists.length,
+                              separatorBuilder: (context, index) => Divider(
+                                height: 1,
+                                color: AppTheme.background.withValues(alpha: 0.1),
+                              ),
+                              itemBuilder: (context, index) {
+                                final list = lists[index];
+                                final isCurrent =
+                                    list.id == provider.currentList.id;
+
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  leading: CircleAvatar(
+                                    backgroundColor: isCurrent
+                                        ? AppTheme.primary
+                                        : AppTheme.secondary.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                    child: Icon(
+                                      Icons.shopping_cart,
+                                      color: isCurrent
+                                          ? Colors.white
+                                          : AppTheme.background,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    list.name,
+                                    style: TextStyle(
+                                      fontWeight: isCurrent
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: AppTheme.background, // Cor da fonte escura
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    '${list.items.length} itens',
+                                    style: TextStyle(
+                                      color: AppTheme.background.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: AppTheme.background,
+                                        ),
+                                        onPressed: () => _showRenameDialog(list),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: AppTheme.danger,
+                                        ),
+                                        onPressed: provider.allLists.length > 1
+                                            ? () => _showDeleteDialog(list)
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    provider.switchList(list.id);
+                                    context.go('/');
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
