@@ -39,19 +39,19 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.list_alt, color: AppTheme.secondary),
-            title: const Text('Suas Listas'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/manage');
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.smart_toy, color: AppTheme.secondary),
             title: const Text('Receita Inteligente'),
             onTap: () {
               Navigator.pop(context);
               context.go('/create_recipe');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.list_alt, color: AppTheme.secondary),
+            title: const Text('Suas Listas'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/manage');
             },
           ),
           Column(
