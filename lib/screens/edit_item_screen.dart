@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../models/shopping_item.dart';
+import '../api/openapi.swagger.dart';
 import '../providers/shopping_provider.dart';
 import '../core/theme.dart';
 import '../widgets/app_drawer.dart';
 
 class EditItemScreen extends StatefulWidget {
-  final int? itemIndex;
+  final String? itemId;
 
-  const EditItemScreen({super.key, this.itemIndex});
+  const EditItemScreen({super.key, this.itemId});
 
   @override
   State<EditItemScreen> createState() => _EditItemScreenState();
@@ -20,16 +20,18 @@ class _EditItemScreenState extends State<EditItemScreen> {
   final _descriptionController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
+  ShoppingItemUnit _selectedUnit = ShoppingItemUnit.und;
 
   @override
   void initState() {
     super.initState();
-    if (widget.itemIndex != null) {
+    if (widget.itemId != null) {
       final provider = context.read<ShoppingProvider>();
-      final item = provider.items[widget.itemIndex!];
-      _descriptionController.text = item.description;
-      _quantityController.text = item.quantity.toString();
-      _priceController.text = item.price.toStringAsFixed(2);
+      final item = provider.items.firstWhere((i) => i.id == widget.itemId);
+      _descriptionController.text = item.description ?? '';
+      _quantityController.text = item.quantity?.toString() ?? '1';
+      _priceController.text = item.price?.toStringAsFixed(2) ?? '0.00';
+      _selectedUnit = item.unit ?? ShoppingItemUnit.und;
     } else {
       // Default values
       _quantityController.text = '1';
@@ -41,25 +43,28 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
     final provider = context.read<ShoppingProvider>();
     final description = _descriptionController.text.trim();
-    final quantity = double.parse(
-      _quantityController.text.replaceAll(',', '.'),
-    );
-    final price = double.parse(_priceController.text.replaceAll(',', '.'));
+    final quantity = double.tryParse(_quantityController.text.replaceAll(',', '.')) ?? 1.0;
+    
+    double price = 0.0;
+    if (_priceController.text.trim().isNotEmpty) {
+      price = double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0;
+    }
+
+    final isChecked = widget.itemId != null 
+        ? provider.items.firstWhere((i) => i.id == widget.itemId).isChecked 
+        : false;
 
     final newItem = ShoppingItem(
-      id: widget.itemIndex != null
-          ? provider.items[widget.itemIndex!].id
-          : DateTime.now().toIso8601String(),
+      id: widget.itemId,
       description: description,
       quantity: quantity,
+      unit: _selectedUnit,
       price: price,
-      isChecked: widget.itemIndex != null
-          ? provider.items[widget.itemIndex!].isChecked
-          : false,
+      isChecked: isChecked,
     );
 
-    if (widget.itemIndex != null) {
-      provider.updateItem(widget.itemIndex!, newItem);
+    if (widget.itemId != null) {
+      provider.updateItem(widget.itemId!, newItem);
     } else {
       provider.addItem(newItem);
     }
@@ -107,6 +112,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   Row(
                     children: [
                       Expanded(
+                        flex: 2,
                         child: TextFormField(
                           controller: _quantityController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -126,6 +132,30 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
+                        flex: 2,
+                        child: DropdownButtonFormField<ShoppingItemUnit>(
+                          value: _selectedUnit,
+                          decoration: const InputDecoration(labelText: 'Unid.'),
+                          items: ShoppingItemUnit.values
+                              .where((u) => u != ShoppingItemUnit.swaggerGeneratedUnknown)
+                              .map((unit) {
+                            return DropdownMenuItem(
+                              value: unit,
+                              child: Text(unit.value!.toUpperCase()),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedUnit = val;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
                         child: TextFormField(
                           controller: _priceController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -135,10 +165,11 @@ class _EditItemScreenState extends State<EditItemScreen> {
                             labelText: 'Preço (R\$)',
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty)
-                              return 'Requerido';
-                            if (double.tryParse(v.replaceAll(',', '.')) == null)
-                              return 'Inválido';
+                            if (v != null && v.trim().isNotEmpty) {
+                              if (double.tryParse(v.replaceAll(',', '.')) == null) {
+                                return 'Inválido';
+                              }
+                            }
                             return null;
                           },
                         ),
@@ -194,3 +225,4 @@ class _EditItemScreenState extends State<EditItemScreen> {
     super.dispose();
   }
 }
+

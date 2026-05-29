@@ -46,14 +46,22 @@ class AppDrawer extends StatelessWidget {
               context.go('/manage');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.smart_toy, color: AppTheme.secondary),
+            title: const Text('Receita Inteligente'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/create_recipe');
+            },
+          ),
           Column(
             children: providerForSync.allLists.map((list) {
-              final isCurrent = list.id == providerForSync.currentList.id;
+              final isCurrent = list.id == providerForSync.currentList?.id;
               return ListTile(
                 contentPadding: const EdgeInsets.only(left: 48, right: 16),
                 dense: true,
                 title: Text(
-                  list.name,
+                  list.name ?? 'Sem Nome',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -62,7 +70,9 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
                 onTap: () {
-                  providerForSync.switchList(list.id);
+                  if (list.id != null) {
+                    providerForSync.switchList(list.id!);
+                  }
                   Navigator.pop(context);
                   context.go('/');
                 },
@@ -74,9 +84,9 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout, color: AppTheme.danger),
             title: const Text('Sair', style: TextStyle(color: AppTheme.danger)),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              context.read<AuthProvider>().logout();
+              await context.read<AuthProvider>().logout();
             },
           ),
           const SizedBox(height: 16),
