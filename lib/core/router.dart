@@ -4,6 +4,7 @@ import '../screens/main_screen.dart';
 import '../screens/edit_item_screen.dart';
 import '../screens/manage_lists_screen.dart';
 import '../screens/create_list_screen.dart';
+import '../screens/create_recipe_screen.dart';
 import '../providers/auth_provider.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
@@ -40,13 +41,17 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/edit',
         builder: (context, state) {
-          final index = state.extra as int?;
-          return EditItemScreen(itemIndex: index);
+          final itemId = state.extra as String?;
+          return EditItemScreen(itemId: itemId);
         },
       ),
       GoRoute(
         path: '/create_list',
         builder: (context, state) => const CreateListScreen(),
+      ),
+      GoRoute(
+        path: '/create_recipe',
+        builder: (context, state) => const CreateRecipeScreen(),
       ),
     ],
   );

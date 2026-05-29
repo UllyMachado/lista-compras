@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/shopping_provider.dart';
-import '../models/shopping_list.dart';
+import '../api/openapi.swagger.dart';
 import '../core/theme.dart';
 import '../widgets/app_drawer.dart';
 
@@ -49,7 +49,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
               onPressed: () {
                 if (renameController.text.isNotEmpty) {
                   context.read<ShoppingProvider>().renameList(
-                    list.id,
+                    list.id!,
                     renameController.text,
                   );
                   Navigator.pop(context);
@@ -80,7 +80,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            'Tem certeza que deseja excluir "${list.name}" permanentemente?',
+            'Tem certeza que deseja excluir "${list.name ?? 'Sem Nome'}" permanentemente?',
             style: const TextStyle(color: Colors.white70),
           ),
           actions: [
@@ -93,7 +93,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.read<ShoppingProvider>().deleteList(list.id);
+                context.read<ShoppingProvider>().deleteList(list.id!);
                 Navigator.pop(context);
               },
               child: const Text(
@@ -183,7 +183,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                         child: Consumer<ShoppingProvider>(
                           builder: (context, provider, child) {
                             final lists = provider.allLists.where((l) {
-                              return l.name.toLowerCase().contains(_searchQuery);
+                              return (l.name ?? '').toLowerCase().contains(_searchQuery);
                             }).toList();
 
                             if (lists.isEmpty) {
@@ -208,7 +208,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                               itemBuilder: (context, index) {
                                 final list = lists[index];
                                 final isCurrent =
-                                    list.id == provider.currentList.id;
+                                    list.id == provider.currentList?.id;
 
                                 return ListTile(
                                   contentPadding: const EdgeInsets.symmetric(
@@ -229,7 +229,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                                     ),
                                   ),
                                   title: Text(
-                                    list.name,
+                                    list.name ?? 'Sem Nome',
                                     style: TextStyle(
                                       fontWeight: isCurrent
                                           ? FontWeight.bold
@@ -240,7 +240,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   subtitle: Text(
-                                    '${list.items.length} itens',
+                                    '${list.items?.length ?? 0} itens',
                                     style: TextStyle(
                                       color: AppTheme.background.withValues(
                                         alpha: 0.7,
@@ -262,14 +262,12 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                                           Icons.delete_outline,
                                           color: AppTheme.danger,
                                         ),
-                                        onPressed: provider.allLists.length > 1
-                                            ? () => _showDeleteDialog(list)
-                                            : null,
+                                        onPressed: () => _showDeleteDialog(list),
                                       ),
                                     ],
                                   ),
                                   onTap: () {
-                                    provider.switchList(list.id);
+                                    provider.switchList(list.id!);
                                     context.go('/');
                                   },
                                 );

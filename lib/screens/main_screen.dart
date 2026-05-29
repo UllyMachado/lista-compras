@@ -24,7 +24,7 @@ class _MainScreenState extends State<MainScreen> {
     // Setup PageController for Infinite Carousel
     final provider = context.read<ShoppingProvider>();
     final currentIndex = provider.allLists.indexWhere(
-      (l) => l.id == provider.currentList.id,
+      (l) => l.id == provider.currentList?.id,
     );
     final validIndex = currentIndex != -1 ? currentIndex : 0;
     final initialPage = provider.allLists.isNotEmpty
@@ -40,7 +40,100 @@ class _MainScreenState extends State<MainScreen> {
     if (provider.allLists.isEmpty) return;
 
     final listIndex = index % provider.allLists.length;
-    provider.switchList(provider.allLists[listIndex].id);
+    provider.switchList(provider.allLists[listIndex].id!);
+  }
+
+  void _showRenameDialog(BuildContext context, dynamic list) {
+    final renameController = TextEditingController(text: list.name);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.background,
+          title: const Text(
+            'Renomear Lista',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: TextField(
+            controller: renameController,
+            textCapitalization: TextCapitalization.sentences,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: 'Novo nome',
+              labelStyle: TextStyle(color: Colors.white70),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppTheme.secondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (renameController.text.isNotEmpty) {
+                  context.read<ShoppingProvider>().renameList(
+                    list.id!,
+                    renameController.text,
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text(
+                'Salvar',
+                style: TextStyle(
+                  color: AppTheme.success,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, dynamic list) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.background,
+          title: const Text(
+            'Confirmar exclusão',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'Tem certeza que deseja excluir "${list.name ?? 'Sem Nome'}" permanentemente?',
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppTheme.secondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<ShoppingProvider>().deleteList(list.id!);
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Excluir',
+                style: TextStyle(
+                  color: AppTheme.danger,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -54,7 +147,7 @@ class _MainScreenState extends State<MainScreen> {
     // Synchronize page controller with external switches
     if (providerForSync.allLists.isNotEmpty) {
       final safeCurrentIndex = providerForSync.allLists.indexWhere(
-        (l) => l.id == providerForSync.currentList.id,
+        (l) => l.id == providerForSync.currentList?.id,
       );
       if (safeCurrentIndex != -1 &&
           safeCurrentIndex != _lastSyncedListIndex &&
@@ -116,13 +209,13 @@ class _MainScreenState extends State<MainScreen> {
                               pageIndex % providerForSync.allLists.length;
                           final currentListModel =
                               providerForSync.allLists[listIndex];
-                          final items = currentListModel.items;
+                          final items = currentListModel.items ?? [];
 
                           double checkedTotal = items
-                              .where((item) => item.isChecked)
-                              .fold(0.0, (sum, item) => sum + item.totalValue);
+                              .where((item) => item.isChecked ?? false)
+                              .fold(0.0, (sum, item) => sum + ((item.quantity ?? 1.0) * (item.price ?? 0.0)));
                           double currentBalance =
-                              currentListModel.budget - checkedTotal;
+                              (currentListModel.budget ?? 0.0) - checkedTotal;
 
                           return Column(
                             children: [
@@ -138,37 +231,62 @@ class _MainScreenState extends State<MainScreen> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    Text(
-                                      currentListModel.name,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                    GestureDetector(
+                                      onTap: () => _showRenameDialog(context, currentListModel),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            currentListModel.name ?? 'Sem Nome',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.edit, color: Colors.white70, size: 18),
+                                        ],
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     Align(
                                       alignment: Alignment.centerRight,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.share,
-                                          color: Colors.white,
-                                        ),
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        onPressed: () {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Link copiado para a área de transferência!',
-                                              ),
-                                              backgroundColor: AppTheme.success,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.delete_outline,
+                                              color: AppTheme.danger,
                                             ),
-                                          );
-                                        },
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            onPressed: () => _showDeleteDialog(context, currentListModel),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.share,
+                                              color: Colors.white,
+                                            ),
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            onPressed: () {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Link copiado para a área de transferência!',
+                                                  ),
+                                                  backgroundColor: AppTheme.success,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -194,7 +312,7 @@ class _MainScreenState extends State<MainScreen> {
                                     Expanded(
                                       flex: 1,
                                       child: _BudgetTextField(
-                                        budget: currentListModel.budget,
+                                        budget: currentListModel.budget ?? 0.0,
                                         onChanged: (newVal) {
                                           if (listIndex ==
                                               _lastSyncedListIndex) {
@@ -345,7 +463,7 @@ class _MainScreenState extends State<MainScreen> {
                                                 if (listIndex ==
                                                     _lastSyncedListIndex) {
                                                   providerForSync.removeItem(
-                                                    index,
+                                                    item.id!,
                                                   );
                                                 }
                                               },
@@ -355,7 +473,7 @@ class _MainScreenState extends State<MainScreen> {
                                                       _lastSyncedListIndex)
                                                     context.push(
                                                       '/edit',
-                                                      extra: index,
+                                                      extra: item.id!,
                                                     );
                                                 },
                                                 child: Padding(
@@ -367,7 +485,7 @@ class _MainScreenState extends State<MainScreen> {
                                                   child: Row(
                                                     children: [
                                                       Checkbox(
-                                                        value: item.isChecked,
+                                                        value: item.isChecked ?? false,
                                                         activeColor:
                                                             AppTheme.success,
                                                         checkColor:
@@ -382,7 +500,7 @@ class _MainScreenState extends State<MainScreen> {
                                                               _lastSyncedListIndex) {
                                                             providerForSync
                                                                 .toggleItemCheck(
-                                                                  index,
+                                                                  item.id!,
                                                                 );
                                                           }
                                                         },
@@ -390,7 +508,7 @@ class _MainScreenState extends State<MainScreen> {
                                                       Expanded(
                                                         flex: 3,
                                                         child: Text(
-                                                          item.description,
+                                                          item.description ?? '',
                                                           maxLines: 1,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -399,7 +517,7 @@ class _MainScreenState extends State<MainScreen> {
                                                             fontWeight:
                                                                 FontWeight.w600,
                                                             decoration:
-                                                                item.isChecked
+                                                                (item.isChecked ?? false)
                                                                 ? TextDecoration
                                                                       .lineThrough
                                                                 : null,
@@ -451,19 +569,19 @@ class _MainScreenState extends State<MainScreen> {
                                                                     _lastSyncedListIndex)
                                                                   providerForSync
                                                                       .updateQuantity(
-                                                                        index,
+                                                                        item.id!,
                                                                         -1,
                                                                       );
                                                               },
                                                             ),
                                                             Text(
-                                                              item.quantity.toStringAsFixed(
-                                                                item.quantity
+                                                              (item.quantity ?? 1.0).toStringAsFixed(
+                                                                (item.quantity ?? 1.0)
                                                                             .truncateToDouble() ==
-                                                                        item.quantity
+                                                                        (item.quantity ?? 1.0)
                                                                     ? 0
                                                                     : 2,
-                                                              ),
+                                                              ) + (item.unit?.value != null ? ' ${item.unit!.value}' : ''),
                                                               style: const TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
@@ -499,7 +617,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                     _lastSyncedListIndex)
                                                                   providerForSync
                                                                       .updateQuantity(
-                                                                        index,
+                                                                        item.id!,
                                                                         1,
                                                                       );
                                                               },
@@ -516,7 +634,7 @@ class _MainScreenState extends State<MainScreen> {
                                                           child: Text(
                                                             currencyFormatter
                                                                 .format(
-                                                                  item.price,
+                                                                  item.price ?? 0.0,
                                                                 ),
                                                             style: TextStyle(
                                                               color: textColor
@@ -538,7 +656,7 @@ class _MainScreenState extends State<MainScreen> {
                                                           child: Text(
                                                             currencyFormatter
                                                                 .format(
-                                                                  item.totalValue,
+                                                                  (item.quantity ?? 1.0) * (item.price ?? 0.0),
                                                                 ),
                                                             style:
                                                                 const TextStyle(
