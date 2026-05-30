@@ -43,15 +43,17 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
     final provider = context.read<ShoppingProvider>();
     final description = _descriptionController.text.trim();
-    final quantity = double.tryParse(_quantityController.text.replaceAll(',', '.')) ?? 1.0;
-    
+    final quantity =
+        double.tryParse(_quantityController.text.replaceAll(',', '.')) ?? 1.0;
+
     double price = 0.0;
     if (_priceController.text.trim().isNotEmpty) {
-      price = double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0;
+      price =
+          double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0;
     }
 
-    final isChecked = widget.itemId != null 
-        ? provider.items.firstWhere((i) => i.id == widget.itemId).isChecked 
+    final isChecked = widget.itemId != null
+        ? provider.items.firstWhere((i) => i.id == widget.itemId).isChecked
         : false;
 
     final newItem = ShoppingItem(
@@ -103,8 +105,16 @@ class _EditItemScreenState extends State<EditItemScreen> {
                     textCapitalization: TextCapitalization.sentences,
                     decoration: const InputDecoration(labelText: 'Descrição'),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty)
+                      if (v == null || v.trim().isEmpty) {
                         return 'Campo obrigatório';
+                      }
+                      final length = v.trim().length;
+                      if (length < 2) {
+                        return 'Mínimo de 2 caracteres';
+                      }
+                      if (length > 100) {
+                        return 'Máximo de 100 caracteres';
+                      }
                       return null;
                     },
                   ),
@@ -122,10 +132,19 @@ class _EditItemScreenState extends State<EditItemScreen> {
                             labelText: 'Quantidade',
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty)
+                            if (v == null || v.trim().isEmpty) {
                               return 'Requerido';
-                            if (double.tryParse(v.replaceAll(',', '.')) == null)
+                            }
+                            final val = double.tryParse(v.replaceAll(',', '.'));
+                            if (val == null) {
                               return 'Inválido';
+                            }
+                            if (val < 0.01) {
+                              return 'Mínimo 0.01';
+                            }
+                            if (val > 9999.0) {
+                              return 'Máximo 9.999';
+                            }
                             return null;
                           },
                         ),
@@ -134,16 +153,21 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       Expanded(
                         flex: 2,
                         child: DropdownButtonFormField<ShoppingItemUnit>(
-                          value: _selectedUnit,
+                          initialValue: _selectedUnit,
                           decoration: const InputDecoration(labelText: 'Unid.'),
                           items: ShoppingItemUnit.values
-                              .where((u) => u != ShoppingItemUnit.swaggerGeneratedUnknown)
+                              .where(
+                                (u) =>
+                                    u !=
+                                    ShoppingItemUnit.swaggerGeneratedUnknown,
+                              )
                               .map((unit) {
-                            return DropdownMenuItem(
-                              value: unit,
-                              child: Text(unit.value!.toUpperCase()),
-                            );
-                          }).toList(),
+                                return DropdownMenuItem(
+                                  value: unit,
+                                  child: Text(unit.value!.toUpperCase()),
+                                );
+                              })
+                              .toList(),
                           onChanged: (val) {
                             if (val != null) {
                               setState(() {
@@ -165,10 +189,18 @@ class _EditItemScreenState extends State<EditItemScreen> {
                             labelText: 'Preço (R\$)',
                           ),
                           validator: (v) {
-                            if (v != null && v.trim().isNotEmpty) {
-                              if (double.tryParse(v.replaceAll(',', '.')) == null) {
-                                return 'Inválido';
-                              }
+                            if (v == null || v.trim().isEmpty) {
+                              return null;
+                            }
+                            final val = double.tryParse(v.replaceAll(',', '.'));
+                            if (val == null) {
+                              return 'Inválido';
+                            }
+                            if (val < 0) {
+                              return 'Mínimo 0.00';
+                            }
+                            if (val > 99999.99) {
+                              return 'Máximo 99.999,99';
                             }
                             return null;
                           },
@@ -225,4 +257,3 @@ class _EditItemScreenState extends State<EditItemScreen> {
     super.dispose();
   }
 }
-
