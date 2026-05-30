@@ -21,20 +21,45 @@ class _EditItemScreenState extends State<EditItemScreen> {
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
   ShoppingItemUnit _selectedUnit = ShoppingItemUnit.und;
+  Category? _selectedCategory;
 
   @override
   void initState() {
     super.initState();
+    final provider = context.read<ShoppingProvider>();
     if (widget.itemId != null) {
-      final provider = context.read<ShoppingProvider>();
       final item = provider.items.firstWhere((i) => i.id == widget.itemId);
       _descriptionController.text = item.description ?? '';
       _quantityController.text = item.quantity?.toString() ?? '1';
       _priceController.text = item.price?.toStringAsFixed(2) ?? '0.00';
       _selectedUnit = item.unit ?? ShoppingItemUnit.und;
+      if (item.category != null) {
+        try {
+          _selectedCategory = provider.categories.firstWhere(
+            (c) => c.id == item.category!.id,
+          );
+        } catch (_) {
+          _selectedCategory = item.category;
+        }
+      } else {
+        try {
+          _selectedCategory = provider.categories.firstWhere(
+            (c) => c.name == 'Outros',
+          );
+        } catch (_) {
+          _selectedCategory = null;
+        }
+      }
     } else {
       // Default values
       _quantityController.text = '1';
+      try {
+        _selectedCategory = provider.categories.firstWhere(
+          (c) => c.name == 'Outros',
+        );
+      } catch (_) {
+        _selectedCategory = null;
+      }
     }
   }
 
@@ -63,6 +88,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
       unit: _selectedUnit,
       price: price,
       isChecked: isChecked,
+      category: _selectedCategory,
     );
 
     if (widget.itemId != null) {
@@ -76,6 +102,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final providerForSync = context.watch<ShoppingProvider>();
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
@@ -116,6 +143,22 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         return 'Máximo de 100 caracteres';
                       }
                       return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<Category?>(
+                    initialValue: _selectedCategory,
+                    decoration: const InputDecoration(labelText: 'Categoria'),
+                    items: providerForSync.categories.map((cat) {
+                      return DropdownMenuItem<Category?>(
+                        value: cat,
+                        child: Text(cat.name ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedCategory = val;
+                      });
                     },
                   ),
                   const SizedBox(height: 16),

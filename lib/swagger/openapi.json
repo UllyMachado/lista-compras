@@ -1,1 +1,496 @@
-{"openapi":"3.0.1","info":{"title":"OpenAPI definition","version":"v0"},"servers":[{"url":"http://localhost:8090","description":"Generated server url"}],"paths":{"/api/lists/{listId}/items/{itemId}":{"put":{"tags":["list-controller"],"operationId":"updateItem","parameters":[{"name":"listId","in":"path","required":true,"schema":{"type":"string"}},{"name":"itemId","in":"path","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShoppingItem"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ShoppingItem"}}}}}},"delete":{"tags":["list-controller"],"operationId":"deleteItem","parameters":[{"name":"listId","in":"path","required":true,"schema":{"type":"string"}},{"name":"itemId","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}}},"/api/lists/{id}":{"get":{"tags":["list-controller"],"operationId":"getListById","parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ShoppingList"}}}}}},"put":{"tags":["list-controller"],"operationId":"updateList","parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShoppingList"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ShoppingList"}}}}}},"delete":{"tags":["list-controller"],"operationId":"deleteList","parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}}},"/api/lists":{"get":{"tags":["list-controller"],"operationId":"getAllLists","responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/ShoppingList"}}}}}}},"post":{"tags":["list-controller"],"operationId":"createList","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShoppingList"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ShoppingList"}}}}}}},"/api/lists/{listId}/items":{"post":{"tags":["list-controller"],"operationId":"addItem","parameters":[{"name":"listId","in":"path","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShoppingItem"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ShoppingItem"}}}}}}},"/api/ai/recipe-to-list":{"post":{"tags":["ai-agent-controller"],"operationId":"createListFromRecipe","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RecipeRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ShoppingList"}}}}}}}},"components":{"schemas":{"ShoppingItem":{"type":"object","properties":{"id":{"type":"string"},"description":{"type":"string"},"quantity":{"type":"number","format":"double"},"unit":{"type":"string","enum":["und","g","kg","l","ml"]},"price":{"type":"number","format":"double"},"isChecked":{"type":"boolean"}}},"ShoppingList":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"budget":{"type":"number","format":"double"},"items":{"type":"array","items":{"$ref":"#/components/schemas/ShoppingItem"}}}},"RecipeRequest":{"type":"object","properties":{"recipe":{"type":"string"}}}}}}
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8090",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/categories": {
+      "get": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "getAllCategories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "createCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "put": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "updateCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/lists/{listId}/items/{itemId}": {
+      "put": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "updateItem",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShoppingItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShoppingItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "deleteItem",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/lists/{id}": {
+      "get": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "getListById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShoppingList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "updateList",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShoppingList"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShoppingList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "deleteList",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/lists": {
+      "get": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "getAllLists",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShoppingList"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "createList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShoppingList"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShoppingList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lists/{listId}/items": {
+      "post": {
+        "tags": [
+          "list-controller"
+        ],
+        "operationId": "addItem",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShoppingItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShoppingItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/recipe-to-list": {
+      "post": {
+        "tags": [
+          "ai-agent-controller"
+        ],
+        "operationId": "createListFromRecipe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShoppingList"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ShoppingItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "und",
+              "g",
+              "kg",
+              "l",
+              "ml"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "isChecked": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          }
+        }
+      },
+      "ShoppingList": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "budget": {
+            "type": "number",
+            "format": "double"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShoppingItem"
+            }
+          }
+        }
+      },
+      "RecipeRequest": {
+        "type": "object",
+        "properties": {
+          "recipe": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

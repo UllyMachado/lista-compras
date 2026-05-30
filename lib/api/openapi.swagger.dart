@@ -53,6 +53,109 @@ abstract class Openapi extends ChopperService {
   }
 
   ///
+  Future<chopper.Response<List<Category>>> apiCategoriesGet() {
+    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
+
+    return _apiCategoriesGet();
+  }
+
+  ///
+  @GET(path: '/api/categories')
+  Future<chopper.Response<List<Category>>> _apiCategoriesGet({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'getAllCategories',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  Future<chopper.Response<Category>> apiCategoriesPost({
+    required Category? body,
+  }) {
+    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
+
+    return _apiCategoriesPost(body: body);
+  }
+
+  ///
+  @POST(path: '/api/categories', optionalBody: true)
+  Future<chopper.Response<Category>> _apiCategoriesPost({
+    @Body() required Category? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'createCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  ///@param id
+  Future<chopper.Response<Category>> apiCategoriesIdPut({
+    required String? id,
+    required Category? body,
+  }) {
+    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
+
+    return _apiCategoriesIdPut(id: id, body: body);
+  }
+
+  ///
+  ///@param id
+  @PUT(path: '/api/categories/{id}', optionalBody: true)
+  Future<chopper.Response<Category>> _apiCategoriesIdPut({
+    @Path('id') required String? id,
+    @Body() required Category? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'updateCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  ///@param id
+  Future<chopper.Response> apiCategoriesIdDelete({required String? id}) {
+    return _apiCategoriesIdDelete(id: id);
+  }
+
+  ///
+  ///@param id
+  @DELETE(path: '/api/categories/{id}')
+  Future<chopper.Response> _apiCategoriesIdDelete({
+    @Path('id') required String? id,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'deleteCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
   ///@param listId
   ///@param itemId
   Future<chopper.Response<ShoppingItem>> apiListsListIdItemsItemIdPut({
@@ -328,6 +431,72 @@ abstract class Openapi extends ChopperService {
 }
 
 @JsonSerializable(explicitToJson: true)
+class Category {
+  const Category({this.id, this.name, this.description});
+
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      _$CategoryFromJson(json);
+
+  static const toJsonFactory = _$CategoryToJson;
+  Map<String, dynamic> toJson() => _$CategoryToJson(this);
+
+  @JsonKey(name: 'id')
+  final String? id;
+  @JsonKey(name: 'name')
+  final String? name;
+  @JsonKey(name: 'description')
+  final String? description;
+  static const fromJsonFactory = _$CategoryFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Category &&
+            (identical(other.id, id) ||
+                const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.name, name) ||
+                const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(
+                  other.description,
+                  description,
+                )));
+  }
+
+  @override
+  String toString() => jsonEncode(this);
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(description) ^
+      runtimeType.hashCode;
+}
+
+extension $CategoryExtension on Category {
+  Category copyWith({String? id, String? name, String? description}) {
+    return Category(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+    );
+  }
+
+  Category copyWithWrapped({
+    Wrapped<String?>? id,
+    Wrapped<String?>? name,
+    Wrapped<String?>? description,
+  }) {
+    return Category(
+      id: (id != null ? id.value : this.id),
+      name: (name != null ? name.value : this.name),
+      description: (description != null ? description.value : this.description),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class ShoppingItem {
   const ShoppingItem({
     this.id,
@@ -336,6 +505,7 @@ class ShoppingItem {
     this.unit,
     this.price,
     this.isChecked,
+    this.category,
   });
 
   factory ShoppingItem.fromJson(Map<String, dynamic> json) =>
@@ -360,6 +530,8 @@ class ShoppingItem {
   final double? price;
   @JsonKey(name: 'isChecked')
   final bool? isChecked;
+  @JsonKey(name: 'category')
+  final Category? category;
   static const fromJsonFactory = _$ShoppingItemFromJson;
 
   @override
@@ -386,6 +558,11 @@ class ShoppingItem {
                 const DeepCollectionEquality().equals(
                   other.isChecked,
                   isChecked,
+                )) &&
+            (identical(other.category, category) ||
+                const DeepCollectionEquality().equals(
+                  other.category,
+                  category,
                 )));
   }
 
@@ -400,6 +577,7 @@ class ShoppingItem {
       const DeepCollectionEquality().hash(unit) ^
       const DeepCollectionEquality().hash(price) ^
       const DeepCollectionEquality().hash(isChecked) ^
+      const DeepCollectionEquality().hash(category) ^
       runtimeType.hashCode;
 }
 
@@ -411,6 +589,7 @@ extension $ShoppingItemExtension on ShoppingItem {
     enums.ShoppingItemUnit? unit,
     double? price,
     bool? isChecked,
+    Category? category,
   }) {
     return ShoppingItem(
       id: id ?? this.id,
@@ -419,6 +598,7 @@ extension $ShoppingItemExtension on ShoppingItem {
       unit: unit ?? this.unit,
       price: price ?? this.price,
       isChecked: isChecked ?? this.isChecked,
+      category: category ?? this.category,
     );
   }
 
@@ -429,6 +609,7 @@ extension $ShoppingItemExtension on ShoppingItem {
     Wrapped<enums.ShoppingItemUnit?>? unit,
     Wrapped<double?>? price,
     Wrapped<bool?>? isChecked,
+    Wrapped<Category?>? category,
   }) {
     return ShoppingItem(
       id: (id != null ? id.value : this.id),
@@ -437,6 +618,7 @@ extension $ShoppingItemExtension on ShoppingItem {
       unit: (unit != null ? unit.value : this.unit),
       price: (price != null ? price.value : this.price),
       isChecked: (isChecked != null ? isChecked.value : this.isChecked),
+      category: (category != null ? category.value : this.category),
     );
   }
 }

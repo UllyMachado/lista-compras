@@ -17,13 +17,23 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _recipeController = TextEditingController();
 
-  void _editItemDialog(BuildContext context, ShoppingItem item, Function(ShoppingItem) onSave) {
+  void _editItemDialog(
+    BuildContext context,
+    ShoppingItem item,
+    Function(ShoppingItem) onSave,
+  ) {
     final formKey = GlobalKey<FormState>();
     final descController = TextEditingController(text: item.description ?? '');
-    final qtyController = TextEditingController(text: item.quantity?.toString() ?? '1');
-    final priceController = TextEditingController(text: item.price != null && item.price! > 0 ? item.price!.toStringAsFixed(2) : '0.00');
+    final qtyController = TextEditingController(
+      text: item.quantity?.toString() ?? '1',
+    );
+    final priceController = TextEditingController(
+      text: item.price != null && item.price! > 0
+          ? item.price!.toStringAsFixed(2)
+          : '0.00',
+    );
     ShoppingItemUnit selectedUnit = item.unit ?? ShoppingItemUnit.und;
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -31,7 +41,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           builder: (context, setSubState) {
             return AlertDialog(
               backgroundColor: AppTheme.background,
-              title: const Text('Editar Item', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              title: const Text(
+                'Editar Item',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               content: Form(
                 key: formKey,
                 child: Column(
@@ -45,7 +61,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         labelText: 'Descrição',
                         labelStyle: TextStyle(color: Colors.white70),
                       ),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Campo obrigatório' : null,
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? 'Campo obrigatório'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -54,15 +72,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           flex: 2,
                           child: TextFormField(
                             controller: qtyController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               labelText: 'Qtd.',
                               labelStyle: TextStyle(color: Colors.white70),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Requerido';
-                              if (double.tryParse(v.replaceAll(',', '.')) == null) return 'Inválido';
+                              if (v == null || v.trim().isEmpty)
+                                return 'Requerido';
+                              if (double.tryParse(v.replaceAll(',', '.')) ==
+                                  null)
+                                return 'Inválido';
                               return null;
                             },
                           ),
@@ -71,7 +94,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         Expanded(
                           flex: 2,
                           child: DropdownButtonFormField<ShoppingItemUnit>(
-                            value: selectedUnit,
+                            initialValue: selectedUnit,
                             dropdownColor: AppTheme.background,
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
@@ -79,13 +102,23 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               labelStyle: TextStyle(color: Colors.white70),
                             ),
                             items: ShoppingItemUnit.values
-                                .where((u) => u != ShoppingItemUnit.swaggerGeneratedUnknown)
+                                .where(
+                                  (u) =>
+                                      u !=
+                                      ShoppingItemUnit.swaggerGeneratedUnknown,
+                                )
                                 .map((unit) {
-                              return DropdownMenuItem(
-                                value: unit,
-                                child: Text(unit.value!.toUpperCase(), style: const TextStyle(color: Colors.white)),
-                              );
-                            }).toList(),
+                                  return DropdownMenuItem(
+                                    value: unit,
+                                    child: Text(
+                                      unit.value!.toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                })
+                                .toList(),
                             onChanged: (val) {
                               if (val != null) {
                                 setSubState(() {
@@ -100,7 +133,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           flex: 3,
                           child: TextFormField(
                             controller: priceController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               labelText: 'Preço (R\$)',
@@ -108,7 +143,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             ),
                             validator: (v) {
                               if (v != null && v.trim().isNotEmpty) {
-                                if (double.tryParse(v.replaceAll(',', '.')) == null) return 'Inválido';
+                                if (double.tryParse(v.replaceAll(',', '.')) ==
+                                    null)
+                                  return 'Inválido';
                               }
                               return null;
                             },
@@ -122,26 +159,43 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar', style: TextStyle(color: AppTheme.secondary)),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: AppTheme.secondary),
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
                       final updated = item.copyWith(
                         description: descController.text.trim(),
-                        quantity: double.tryParse(qtyController.text.replaceAll(',', '.')) ?? 1.0,
+                        quantity:
+                            double.tryParse(
+                              qtyController.text.replaceAll(',', '.'),
+                            ) ??
+                            1.0,
                         unit: selectedUnit,
-                        price: double.tryParse(priceController.text.replaceAll(',', '.')) ?? 0.0,
+                        price:
+                            double.tryParse(
+                              priceController.text.replaceAll(',', '.'),
+                            ) ??
+                            0.0,
                       );
                       onSave(updated);
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text('Salvar', style: TextStyle(color: AppTheme.success, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Salvar',
+                    style: TextStyle(
+                      color: AppTheme.success,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -149,28 +203,34 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   void _save() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     final recipe = _recipeController.text.trim();
     final provider = context.read<ShoppingProvider>();
-    
+
     final ShoppingList? parsedList = await provider.parseRecipe(recipe);
-    
-    if (parsedList == null || parsedList.items == null || parsedList.items!.isEmpty) {
+
+    if (parsedList == null ||
+        parsedList.items == null ||
+        parsedList.items!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Não foi possível extrair os ingredientes da receita.'),
+            content: Text(
+              'Não foi possível extrair os ingredientes da receita.',
+            ),
             backgroundColor: AppTheme.danger,
           ),
         );
       }
       return;
     }
-    
+
     if (!mounted) return;
 
-    final List<ShoppingItem> localItems = List<ShoppingItem>.from(parsedList.items ?? []);
-    
+    final List<ShoppingItem> localItems = List<ShoppingItem>.from(
+      parsedList.items ?? [],
+    );
+
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -185,12 +245,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   Expanded(
                     child: Text(
                       parsedList.name ?? 'Confirmar Lista',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.add_circle_outline, color: AppTheme.success, size: 24),
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      color: AppTheme.success,
+                      size: 24,
+                    ),
                     tooltip: 'Adicionar Item',
                     onPressed: () {
                       _editItemDialog(
@@ -230,32 +298,49 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         itemCount: localItems.length,
                         itemBuilder: (context, index) {
                           final item = localItems[index];
-                          final priceFormatted = item.price != null && item.price! > 0
+                          final priceFormatted =
+                              item.price != null && item.price! > 0
                               ? 'R\$ ${item.price!.toStringAsFixed(2)}'
                               : 'R\$ 0.00';
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               item.description ?? '',
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             subtitle: Text(
                               priceFormatted,
-                              style: const TextStyle(color: Colors.white60, fontSize: 12),
+                              style: const TextStyle(
+                                color: Colors.white60,
+                                fontSize: 12,
+                              ),
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   '${item.quantity?.toStringAsFixed(0) ?? '1'} ${(item.unit?.value ?? 'und').toUpperCase()}',
-                                  style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.white70, size: 18),
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.white70,
+                                    size: 18,
+                                  ),
                                   onPressed: () {
-                                    _editItemDialog(context, item, (updatedItem) {
+                                    _editItemDialog(context, item, (
+                                      updatedItem,
+                                    ) {
                                       setDialogState(() {
                                         localItems[index] = updatedItem;
                                       });
@@ -263,7 +348,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: AppTheme.danger, size: 18),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppTheme.danger,
+                                    size: 18,
+                                  ),
                                   onPressed: () {
                                     setDialogState(() {
                                       localItems.removeAt(index);
@@ -300,9 +389,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         );
       },
     );
-    
+
     if (confirmed == true && mounted) {
-      final success = await provider.createListWithItems(parsedList.copyWith(items: localItems));
+      final success = await provider.createListWithItems(
+        parsedList.copyWith(items: localItems),
+      );
       if (success && mounted) {
         context.go('/');
       } else if (mounted) {
@@ -357,7 +448,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Cole o texto da receita abaixo. A IA irá identificar o nome da receita e os ingredientes, criando uma nova lista de compras automaticamente.',
-                    style: TextStyle(color: AppTheme.secondary.withValues(alpha: 0.7)),
+                    style: TextStyle(
+                      color: AppTheme.secondary.withValues(alpha: 0.7),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
@@ -369,7 +462,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       alignLabelWithHint: true,
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Campo obrigatório';
+                      if (v == null || v.trim().isEmpty)
+                        return 'Campo obrigatório';
                       return null;
                     },
                   ),
@@ -387,23 +481,29 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text('CANCELAR', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            'CANCELAR',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: isLoading ? null : _save,
-                          child: isLoading 
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'EXTRAIR',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                              )
-                            : const Text('EXTRAIR', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],

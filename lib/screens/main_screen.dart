@@ -213,7 +213,13 @@ class _MainScreenState extends State<MainScreen> {
 
                           double checkedTotal = items
                               .where((item) => item.isChecked ?? false)
-                              .fold(0.0, (sum, item) => sum + ((item.quantity ?? 1.0) * (item.price ?? 0.0)));
+                              .fold(
+                                0.0,
+                                (sum, item) =>
+                                    sum +
+                                    ((item.quantity ?? 1.0) *
+                                        (item.price ?? 0.0)),
+                              );
                           double currentBalance =
                               (currentListModel.budget ?? 0.0) - checkedTotal;
 
@@ -232,7 +238,10 @@ class _MainScreenState extends State<MainScreen> {
                                   alignment: Alignment.center,
                                   children: [
                                     GestureDetector(
-                                      onTap: () => _showRenameDialog(context, currentListModel),
+                                      onTap: () => _showRenameDialog(
+                                        context,
+                                        currentListModel,
+                                      ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -247,7 +256,11 @@ class _MainScreenState extends State<MainScreen> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(width: 8),
-                                          const Icon(Icons.edit, color: Colors.white70, size: 18),
+                                          const Icon(
+                                            Icons.edit,
+                                            color: Colors.white70,
+                                            size: 18,
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -263,7 +276,10 @@ class _MainScreenState extends State<MainScreen> {
                                             ),
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(),
-                                            onPressed: () => _showDeleteDialog(context, currentListModel),
+                                            onPressed: () => _showDeleteDialog(
+                                              context,
+                                              currentListModel,
+                                            ),
                                           ),
                                           const SizedBox(width: 16),
                                           IconButton(
@@ -281,7 +297,8 @@ class _MainScreenState extends State<MainScreen> {
                                                   content: Text(
                                                     'Link copiado para a área de transferência!',
                                                   ),
-                                                  backgroundColor: AppTheme.success,
+                                                  backgroundColor:
+                                                      AppTheme.success,
                                                 ),
                                               );
                                             },
@@ -485,7 +502,9 @@ class _MainScreenState extends State<MainScreen> {
                                                   child: Row(
                                                     children: [
                                                       Checkbox(
-                                                        value: item.isChecked ?? false,
+                                                        value:
+                                                            item.isChecked ??
+                                                            false,
                                                         activeColor:
                                                             AppTheme.success,
                                                         checkColor:
@@ -507,23 +526,60 @@ class _MainScreenState extends State<MainScreen> {
                                                       ),
                                                       Expanded(
                                                         flex: 3,
-                                                        child: Text(
-                                                          item.description ?? '',
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: TextStyle(
-                                                            color: textColor,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            decoration:
-                                                                (item.isChecked ?? false)
-                                                                ? TextDecoration
-                                                                      .lineThrough
-                                                                : null,
-                                                            decorationColor:
-                                                                textColor,
-                                                          ),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Text(
+                                                              item.description ??
+                                                                  '',
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                color:
+                                                                    textColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                decoration:
+                                                                    (item.isChecked ??
+                                                                        false)
+                                                                    ? TextDecoration
+                                                                          .lineThrough
+                                                                    : null,
+                                                                decorationColor:
+                                                                    textColor,
+                                                              ),
+                                                            ),
+                                                            if (item.category !=
+                                                                null) ...[
+                                                              const SizedBox(
+                                                                height: 2,
+                                                              ),
+                                                              Text(
+                                                                item
+                                                                        .category!
+                                                                        .name ??
+                                                                    '',
+                                                                style: TextStyle(
+                                                                  color: textColor
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.6,
+                                                                      ),
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ],
                                                         ),
                                                       ),
                                                       Container(
@@ -575,13 +631,21 @@ class _MainScreenState extends State<MainScreen> {
                                                               },
                                                             ),
                                                             Text(
-                                                              (item.quantity ?? 1.0).toStringAsFixed(
-                                                                (item.quantity ?? 1.0)
-                                                                            .truncateToDouble() ==
-                                                                        (item.quantity ?? 1.0)
-                                                                    ? 0
-                                                                    : 2,
-                                                              ) + (item.unit?.value != null ? ' ${item.unit!.value}' : ''),
+                                                              (item.quantity ??
+                                                                          1.0)
+                                                                      .toStringAsFixed(
+                                                                        (item.quantity ??
+                                                                                        1.0)
+                                                                                    .truncateToDouble() ==
+                                                                                (item.quantity ??
+                                                                                    1.0)
+                                                                            ? 0
+                                                                            : 2,
+                                                                      ) +
+                                                                  (item.unit?.value !=
+                                                                          null
+                                                                      ? ' ${item.unit!.value}'
+                                                                      : ''),
                                                               style: const TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
@@ -634,7 +698,8 @@ class _MainScreenState extends State<MainScreen> {
                                                           child: Text(
                                                             currencyFormatter
                                                                 .format(
-                                                                  item.price ?? 0.0,
+                                                                  item.price ??
+                                                                      0.0,
                                                                 ),
                                                             style: TextStyle(
                                                               color: textColor
@@ -654,10 +719,12 @@ class _MainScreenState extends State<MainScreen> {
                                                           alignment: Alignment
                                                               .centerRight,
                                                           child: Text(
-                                                            currencyFormatter
-                                                                .format(
-                                                                  (item.quantity ?? 1.0) * (item.price ?? 0.0),
-                                                                ),
+                                                            currencyFormatter.format(
+                                                              (item.quantity ??
+                                                                      1.0) *
+                                                                  (item.price ??
+                                                                      0.0),
+                                                            ),
                                                             style:
                                                                 const TextStyle(
                                                                   color:
