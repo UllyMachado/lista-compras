@@ -5,6 +5,7 @@ import '../screens/edit_item_screen.dart';
 import '../screens/manage_lists_screen.dart';
 import '../screens/create_list_screen.dart';
 import '../screens/create_recipe_screen.dart';
+import '../screens/manage_categories_screen.dart';
 import '../providers/auth_provider.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
@@ -26,14 +27,8 @@ GoRouter createRouter(AuthProvider authProvider) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const MainScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/', builder: (context, state) => const MainScreen()),
       GoRoute(
         path: '/manage',
         builder: (context, state) => const ManageListsScreen(),
@@ -52,6 +47,10 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/create_recipe',
         builder: (context, state) => const CreateRecipeScreen(),
+      ),
+      GoRoute(
+        path: '/categories',
+        builder: (context, state) => const ManageCategoriesScreen(),
       ),
     ],
   );

@@ -19,6 +19,106 @@ final class _$Openapi extends Openapi {
   final Type definitionType = Openapi;
 
   @override
+  Future<Response<List<Category>>> _apiCategoriesGet({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'getAllCategories',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/categories');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Category>, Category>($request);
+  }
+
+  @override
+  Future<Response<Category>> _apiCategoriesPost({
+    required Category? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'createCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/categories');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Category, Category>($request);
+  }
+
+  @override
+  Future<Response<Category>> _apiCategoriesIdPut({
+    required String? id,
+    required Category? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'updateCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/categories/${id}');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Category, Category>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _apiCategoriesIdDelete({
+    required String? id,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'deleteCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/categories/${id}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<ShoppingItem>> _apiListsListIdItemsItemIdPut({
     required String? listId,
     required String? itemId,
