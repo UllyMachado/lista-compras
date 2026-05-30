@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/shopping_provider.dart';
+import '../api/openapi.swagger.dart';
 import '../core/theme.dart';
 import '../widgets/app_drawer.dart';
 
@@ -16,16 +17,302 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _recipeController = TextEditingController();
 
+  void _editItemDialog(BuildContext context, ShoppingItem item, Function(ShoppingItem) onSave) {
+    final formKey = GlobalKey<FormState>();
+    final descController = TextEditingController(text: item.description ?? '');
+    final qtyController = TextEditingController(text: item.quantity?.toString() ?? '1');
+    final priceController = TextEditingController(text: item.price != null && item.price! > 0 ? item.price!.toStringAsFixed(2) : '0.00');
+    ShoppingItemUnit selectedUnit = item.unit ?? ShoppingItemUnit.und;
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSubState) {
+            return AlertDialog(
+              backgroundColor: AppTheme.background,
+              title: const Text('Editar Item', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: descController,
+                      style: const TextStyle(color: Colors.white),
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: const InputDecoration(
+                        labelText: 'Descrição',
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Campo obrigatório' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: qtyController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Qtd.',
+                              labelStyle: TextStyle(color: Colors.white70),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) return 'Requerido';
+                              if (double.tryParse(v.replaceAll(',', '.')) == null) return 'Inválido';
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: DropdownButtonFormField<ShoppingItemUnit>(
+                            value: selectedUnit,
+                            dropdownColor: AppTheme.background,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Unid.',
+                              labelStyle: TextStyle(color: Colors.white70),
+                            ),
+                            items: ShoppingItemUnit.values
+                                .where((u) => u != ShoppingItemUnit.swaggerGeneratedUnknown)
+                                .map((unit) {
+                              return DropdownMenuItem(
+                                value: unit,
+                                child: Text(unit.value!.toUpperCase(), style: const TextStyle(color: Colors.white)),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setSubState(() {
+                                  selectedUnit = val;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                            controller: priceController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Preço (R\$)',
+                              labelStyle: TextStyle(color: Colors.white70),
+                            ),
+                            validator: (v) {
+                              if (v != null && v.trim().isNotEmpty) {
+                                if (double.tryParse(v.replaceAll(',', '.')) == null) return 'Inválido';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar', style: TextStyle(color: AppTheme.secondary)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      final updated = item.copyWith(
+                        description: descController.text.trim(),
+                        quantity: double.tryParse(qtyController.text.replaceAll(',', '.')) ?? 1.0,
+                        unit: selectedUnit,
+                        price: double.tryParse(priceController.text.replaceAll(',', '.')) ?? 0.0,
+                      );
+                      onSave(updated);
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text('Salvar', style: TextStyle(color: AppTheme.success, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
+
   void _save() async {
     if (!_formKey.currentState!.validate()) return;
     
     final recipe = _recipeController.text.trim();
     final provider = context.read<ShoppingProvider>();
     
-    await provider.createListFromRecipe(recipe);
+    final ShoppingList? parsedList = await provider.parseRecipe(recipe);
     
-    if (mounted) {
-      context.go('/');
+    if (parsedList == null || parsedList.items == null || parsedList.items!.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível extrair os ingredientes da receita.'),
+            backgroundColor: AppTheme.danger,
+          ),
+        );
+      }
+      return;
+    }
+    
+    if (!mounted) return;
+
+    final List<ShoppingItem> localItems = List<ShoppingItem>.from(parsedList.items ?? []);
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppTheme.background,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      parsedList.name ?? 'Confirmar Lista',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline, color: AppTheme.success, size: 24),
+                    tooltip: 'Adicionar Item',
+                    onPressed: () {
+                      _editItemDialog(
+                        context,
+                        const ShoppingItem(
+                          description: '',
+                          quantity: 1.0,
+                          unit: ShoppingItemUnit.und,
+                          price: 0.0,
+                          isChecked: false,
+                        ),
+                        (newItem) {
+                          setDialogState(() {
+                            localItems.add(newItem);
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+              content: localItems.isEmpty
+                  ? const SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: Text(
+                          'Nenhum item na lista.',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      constraints: const BoxConstraints(maxHeight: 350),
+                      width: double.maxFinite,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: localItems.length,
+                        itemBuilder: (context, index) {
+                          final item = localItems[index];
+                          final priceFormatted = item.price != null && item.price! > 0
+                              ? 'R\$ ${item.price!.toStringAsFixed(2)}'
+                              : 'R\$ 0.00';
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              item.description ?? '',
+                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(
+                              priceFormatted,
+                              style: const TextStyle(color: Colors.white60, fontSize: 12),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${item.quantity?.toStringAsFixed(0) ?? '1'} ${(item.unit?.value ?? 'und').toUpperCase()}',
+                                  style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.white70, size: 18),
+                                  onPressed: () {
+                                    _editItemDialog(context, item, (updatedItem) {
+                                      setDialogState(() {
+                                        localItems[index] = updatedItem;
+                                      });
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: AppTheme.danger, size: 18),
+                                  onPressed: () {
+                                    setDialogState(() {
+                                      localItems.removeAt(index);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: AppTheme.secondary),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text(
+                    'Confirmar',
+                    style: TextStyle(
+                      color: AppTheme.success,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    
+    if (confirmed == true && mounted) {
+      final success = await provider.createListWithItems(parsedList.copyWith(items: localItems));
+      if (success && mounted) {
+        context.go('/');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao salvar a lista de compras.'),
+            backgroundColor: AppTheme.danger,
+          ),
+        );
+      }
     }
   }
 

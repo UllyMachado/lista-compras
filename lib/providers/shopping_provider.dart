@@ -184,7 +184,7 @@ class ShoppingProvider with ChangeNotifier {
     await updateItem(itemId, item.copyWith(quantity: newQuantity));
   }
 
-  Future<void> createListFromRecipe(String recipe) async {
+  Future<ShoppingList?> parseRecipe(String recipe) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -192,15 +192,35 @@ class ShoppingProvider with ChangeNotifier {
       final response = await _api.apiAiRecipeToListPost(body: RecipeRequest(recipe: recipe));
 
       if (response.isSuccessful && response.body != null) {
-        final newList = response.body!;
-        _lists.add(newList);
-        _currentListId = newList.id;
-        notifyListeners();
+        return response.body;
       } else {
-        debugPrint("Failed to create list from recipe: ${response.statusCode} - ${response.error}");
+        debugPrint("Failed to parse recipe: ${response.statusCode} - ${response.error}");
+        return null;
       }
     } catch (e) {
-      debugPrint("Error creating list from recipe: $e");
+      debugPrint("Error parsing recipe: $e");
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> createListWithItems(ShoppingList list) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await _api.apiListsPost(body: list);
+      if (response.isSuccessful && response.body != null) {
+        _lists.add(response.body!);
+        _currentListId = response.body!.id;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error creating list with items: $e");
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
