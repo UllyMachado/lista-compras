@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' hide Category;
 import '../api/openapi.swagger.dart';
 import '../core/filter_enums.dart';
+import '../core/globals.dart';
 
 class ShoppingProvider with ChangeNotifier {
   final Openapi _api;
@@ -151,6 +152,7 @@ class ShoppingProvider with ChangeNotifier {
         }
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao buscar listas.');
       debugPrint("Error fetching lists: $e");
     } finally {
       _isLoading = false;
@@ -171,6 +173,7 @@ class ShoppingProvider with ChangeNotifier {
         _currentListId = response.body!.id;
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao criar lista.');
       debugPrint("Error creating list: $e");
     } finally {
       _isLoading = false;
@@ -192,6 +195,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao renomear lista.');
       debugPrint("Error renaming list: $e");
     }
   }
@@ -207,6 +211,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao excluir lista.');
       debugPrint("Error deleting list: $e");
     }
   }
@@ -235,6 +240,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao definir orçamento.');
       debugPrint("Error setting budget: $e");
     }
   }
@@ -254,6 +260,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao adicionar item.');
       debugPrint("Error adding item: $e");
     }
   }
@@ -277,6 +284,7 @@ class ShoppingProvider with ChangeNotifier {
         }
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao atualizar item.');
       debugPrint("Error updating item: $e");
     }
   }
@@ -296,6 +304,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao excluir item.');
       debugPrint("Error removing item: $e");
     }
   }
@@ -335,6 +344,7 @@ class ShoppingProvider with ChangeNotifier {
         return null;
       }
     } catch (e) {
+      showErrorSnackBar('Erro ao processar receita com inteligência artificial.');
       debugPrint("Error parsing recipe: $e");
       return null;
     } finally {
@@ -356,6 +366,7 @@ class ShoppingProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
+      showErrorSnackBar('Erro ao criar lista a partir dos itens.');
       debugPrint("Error creating list with items: $e");
       return false;
     } finally {
@@ -374,6 +385,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao buscar categorias.');
       debugPrint("Error fetching categories: $e");
     }
   }
@@ -388,6 +400,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao criar categoria.');
       debugPrint("Error creating category: $e");
     }
   }
@@ -424,6 +437,7 @@ class ShoppingProvider with ChangeNotifier {
         }
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao atualizar categoria.');
       debugPrint("Error updating category: $e");
     }
   }
@@ -452,6 +466,7 @@ class ShoppingProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      showErrorSnackBar('Erro de conexão ao excluir categoria.');
       debugPrint("Error deleting category: $e");
     }
   }

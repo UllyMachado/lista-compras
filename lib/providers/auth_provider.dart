@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
+import '../core/globals.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
@@ -62,7 +63,9 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      debugPrint('Login failed: $e');
+      _isAuthenticated = false;
+      showErrorSnackBar('Credenciais inválidas ou falha de rede.');
+      notifyListeners();
       return false;
     }
   }

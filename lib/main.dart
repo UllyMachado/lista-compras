@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/config.dart';
 import 'package:provider/provider.dart';
 import 'core/theme.dart';
+import 'core/globals.dart';
 import 'core/router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/shopping_provider.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
           final auth = context.read<AuthProvider>();
           final router = createRouter(auth);
           return MaterialApp.router(
+            scaffoldMessengerKey: scaffoldMessengerKey,
             title: 'Listas de Compras',
             theme: AppTheme.themeData,
             routerConfig: router,

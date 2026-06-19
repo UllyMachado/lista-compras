@@ -3,6 +3,7 @@ import 'package:chopper/chopper.dart';
 import 'package:flutter/foundation.dart';
 import 'token_storage.dart';
 import 'auth_service.dart';
+import '../core/globals.dart';
 
 /// Chopper Interceptor that injects the Bearer token into every request
 /// and handles automatic token refresh on 401 responses.
@@ -52,6 +53,7 @@ class AuthInterceptor implements Interceptor {
           // If refresh token has also expired/invalidated, clean storage and force logout.
           debugPrint('Token refresh failed: $e');
           await _tokenStorage.clearTokens();
+          showErrorSnackBar('Sessão expirada. Por favor, faça login novamente.');
           _onAuthFailure();
         }
       } else {
