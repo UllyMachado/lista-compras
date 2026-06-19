@@ -5,6 +5,7 @@ import '../providers/shopping_provider.dart';
 import '../api/openapi.swagger.dart';
 import '../core/theme.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/category_icon.dart';
 
 class ManageCategoriesScreen extends StatefulWidget {
   const ManageCategoriesScreen({super.key});
@@ -254,8 +255,8 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                                     backgroundColor: AppTheme.secondary.withValues(
                                       alpha: 0.2,
                                     ),
-                                    child: const Icon(
-                                      Icons.category,
+                                    child: Icon(
+                                      getCategoryIcon(category.name),
                                       color: AppTheme.background,
                                     ),
                                   ),
