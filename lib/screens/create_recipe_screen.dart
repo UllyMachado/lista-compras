@@ -16,6 +16,7 @@ class CreateRecipeScreen extends StatefulWidget {
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _recipeController = TextEditingController();
+  bool _aiConsent = false;
 
   void _editItemDialog(
     BuildContext context,
@@ -467,7 +468,58 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+                  FormField<bool>(
+                    initialValue: _aiConsent,
+                    validator: (v) {
+                      if (!_aiConsent) {
+                        return 'É necessário consentir para prosseguir.';
+                      }
+                      return null;
+                    },
+                    builder: (state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text(
+                              'Concordo em enviar o texto desta receita para processamento via Inteligência Artificial e entendo que os dados serão analisados para extrair os ingredientes.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white70,
+                              ),
+                            ),
+                            value: _aiConsent,
+                            onChanged: (val) {
+                              setState(() {
+                                _aiConsent = val ?? false;
+                              });
+                              state.didChange(_aiConsent);
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                            activeColor: AppTheme.primary,
+                            checkColor: Colors.white,
+                          ),
+                          if (state.hasError)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 12,
+                                bottom: 8,
+                              ),
+                              child: Text(
+                                state.errorText!,
+                                style: const TextStyle(
+                                  color: AppTheme.danger,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
