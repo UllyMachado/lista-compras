@@ -53,109 +53,6 @@ abstract class Openapi extends ChopperService {
   }
 
   ///
-  Future<chopper.Response<List<Category>>> apiCategoriesGet() {
-    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
-
-    return _apiCategoriesGet();
-  }
-
-  ///
-  @GET(path: '/api/categories')
-  Future<chopper.Response<List<Category>>> _apiCategoriesGet({
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: '',
-      operationId: 'getAllCategories',
-      consumes: [],
-      produces: [],
-      security: [],
-      tags: ["category-controller"],
-      deprecated: false,
-    ),
-  });
-
-  ///
-  Future<chopper.Response<Category>> apiCategoriesPost({
-    required Category? body,
-  }) {
-    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
-
-    return _apiCategoriesPost(body: body);
-  }
-
-  ///
-  @POST(path: '/api/categories', optionalBody: true)
-  Future<chopper.Response<Category>> _apiCategoriesPost({
-    @Body() required Category? body,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: '',
-      operationId: 'createCategory',
-      consumes: [],
-      produces: [],
-      security: [],
-      tags: ["category-controller"],
-      deprecated: false,
-    ),
-  });
-
-  ///
-  ///@param id
-  Future<chopper.Response<Category>> apiCategoriesIdPut({
-    required String? id,
-    required Category? body,
-  }) {
-    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
-
-    return _apiCategoriesIdPut(id: id, body: body);
-  }
-
-  ///
-  ///@param id
-  @PUT(path: '/api/categories/{id}', optionalBody: true)
-  Future<chopper.Response<Category>> _apiCategoriesIdPut({
-    @Path('id') required String? id,
-    @Body() required Category? body,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: '',
-      operationId: 'updateCategory',
-      consumes: [],
-      produces: [],
-      security: [],
-      tags: ["category-controller"],
-      deprecated: false,
-    ),
-  });
-
-  ///
-  ///@param id
-  Future<chopper.Response> apiCategoriesIdDelete({required String? id}) {
-    return _apiCategoriesIdDelete(id: id);
-  }
-
-  ///
-  ///@param id
-  @DELETE(path: '/api/categories/{id}')
-  Future<chopper.Response> _apiCategoriesIdDelete({
-    @Path('id') required String? id,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: '',
-      operationId: 'deleteCategory',
-      consumes: [],
-      produces: [],
-      security: [],
-      tags: ["category-controller"],
-      deprecated: false,
-    ),
-  });
-
-  ///
   ///@param listId
   ///@param itemId
   Future<chopper.Response<ShoppingItem>> apiListsListIdItemsItemIdPut({
@@ -313,6 +210,60 @@ abstract class Openapi extends ChopperService {
   });
 
   ///
+  ///@param id
+  Future<chopper.Response<Category>> apiCategoriesIdPut({
+    required String? id,
+    required Category? body,
+  }) {
+    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
+
+    return _apiCategoriesIdPut(id: id, body: body);
+  }
+
+  ///
+  ///@param id
+  @PUT(path: '/api/categories/{id}', optionalBody: true)
+  Future<chopper.Response<Category>> _apiCategoriesIdPut({
+    @Path('id') required String? id,
+    @Body() required Category? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'updateCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  ///@param id
+  Future<chopper.Response> apiCategoriesIdDelete({required String? id}) {
+    return _apiCategoriesIdDelete(id: id);
+  }
+
+  ///
+  ///@param id
+  @DELETE(path: '/api/categories/{id}')
+  Future<chopper.Response> _apiCategoriesIdDelete({
+    @Path('id') required String? id,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'deleteCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
   Future<chopper.Response<List<ShoppingList>>> apiListsGet() {
     generatedMapping.putIfAbsent(
       ShoppingList,
@@ -396,6 +347,103 @@ abstract class Openapi extends ChopperService {
       produces: [],
       security: [],
       tags: ["list-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  Future<chopper.Response<List<Category>>> apiCategoriesGet() {
+    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
+
+    return _apiCategoriesGet();
+  }
+
+  ///
+  @GET(path: '/api/categories')
+  Future<chopper.Response<List<Category>>> _apiCategoriesGet({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'getAllCategories',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  Future<chopper.Response<Category>> apiCategoriesPost({
+    required Category? body,
+  }) {
+    generatedMapping.putIfAbsent(Category, () => Category.fromJsonFactory);
+
+    return _apiCategoriesPost(body: body);
+  }
+
+  ///
+  @POST(path: '/api/categories', optionalBody: true)
+  Future<chopper.Response<Category>> _apiCategoriesPost({
+    @Body() required Category? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'createCategory',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["category-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  Future<chopper.Response<Object>> apiAuthRefreshPost({
+    required RefreshRequest? body,
+  }) {
+    return _apiAuthRefreshPost(body: body);
+  }
+
+  ///
+  @POST(path: '/api/auth/refresh', optionalBody: true)
+  Future<chopper.Response<Object>> _apiAuthRefreshPost({
+    @Body() required RefreshRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'refresh',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth-controller"],
+      deprecated: false,
+    ),
+  });
+
+  ///
+  Future<chopper.Response<Object>> apiAuthLoginPost({
+    required AuthRequest? body,
+  }) {
+    return _apiAuthLoginPost(body: body);
+  }
+
+  ///
+  @POST(path: '/api/auth/login', optionalBody: true)
+  Future<chopper.Response<Object>> _apiAuthLoginPost({
+    @Body() required AuthRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: '',
+      operationId: 'login',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth-controller"],
       deprecated: false,
     ),
   });
@@ -625,7 +673,15 @@ extension $ShoppingItemExtension on ShoppingItem {
 
 @JsonSerializable(explicitToJson: true)
 class ShoppingList {
-  const ShoppingList({this.id, this.name, this.budget, this.items});
+  const ShoppingList({
+    this.id,
+    this.name,
+    this.budget,
+    this.description,
+    this.status,
+    this.createdAt,
+    this.items,
+  });
 
   factory ShoppingList.fromJson(Map<String, dynamic> json) =>
       _$ShoppingListFromJson(json);
@@ -639,6 +695,12 @@ class ShoppingList {
   final String? name;
   @JsonKey(name: 'budget')
   final double? budget;
+  @JsonKey(name: 'description')
+  final String? description;
+  @JsonKey(name: 'status')
+  final String? status;
+  @JsonKey(name: 'createdAt')
+  final String? createdAt;
   @JsonKey(name: 'items', defaultValue: <ShoppingItem>[])
   final List<ShoppingItem>? items;
   static const fromJsonFactory = _$ShoppingListFromJson;
@@ -653,6 +715,18 @@ class ShoppingList {
                 const DeepCollectionEquality().equals(other.name, name)) &&
             (identical(other.budget, budget) ||
                 const DeepCollectionEquality().equals(other.budget, budget)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(
+                  other.description,
+                  description,
+                )) &&
+            (identical(other.status, status) ||
+                const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(
+                  other.createdAt,
+                  createdAt,
+                )) &&
             (identical(other.items, items) ||
                 const DeepCollectionEquality().equals(other.items, items)));
   }
@@ -665,6 +739,9 @@ class ShoppingList {
       const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(budget) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(status) ^
+      const DeepCollectionEquality().hash(createdAt) ^
       const DeepCollectionEquality().hash(items) ^
       runtimeType.hashCode;
 }
@@ -674,12 +751,18 @@ extension $ShoppingListExtension on ShoppingList {
     String? id,
     String? name,
     double? budget,
+    String? description,
+    String? status,
+    String? createdAt,
     List<ShoppingItem>? items,
   }) {
     return ShoppingList(
       id: id ?? this.id,
       name: name ?? this.name,
       budget: budget ?? this.budget,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
       items: items ?? this.items,
     );
   }
@@ -688,13 +771,124 @@ extension $ShoppingListExtension on ShoppingList {
     Wrapped<String?>? id,
     Wrapped<String?>? name,
     Wrapped<double?>? budget,
+    Wrapped<String?>? description,
+    Wrapped<String?>? status,
+    Wrapped<String?>? createdAt,
     Wrapped<List<ShoppingItem>?>? items,
   }) {
     return ShoppingList(
       id: (id != null ? id.value : this.id),
       name: (name != null ? name.value : this.name),
       budget: (budget != null ? budget.value : this.budget),
+      description: (description != null ? description.value : this.description),
+      status: (status != null ? status.value : this.status),
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
       items: (items != null ? items.value : this.items),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class RefreshRequest {
+  const RefreshRequest({this.refreshToken});
+
+  factory RefreshRequest.fromJson(Map<String, dynamic> json) =>
+      _$RefreshRequestFromJson(json);
+
+  static const toJsonFactory = _$RefreshRequestToJson;
+  Map<String, dynamic> toJson() => _$RefreshRequestToJson(this);
+
+  @JsonKey(name: 'refreshToken')
+  final String? refreshToken;
+  static const fromJsonFactory = _$RefreshRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RefreshRequest &&
+            (identical(other.refreshToken, refreshToken) ||
+                const DeepCollectionEquality().equals(
+                  other.refreshToken,
+                  refreshToken,
+                )));
+  }
+
+  @override
+  String toString() => jsonEncode(this);
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(refreshToken) ^ runtimeType.hashCode;
+}
+
+extension $RefreshRequestExtension on RefreshRequest {
+  RefreshRequest copyWith({String? refreshToken}) {
+    return RefreshRequest(refreshToken: refreshToken ?? this.refreshToken);
+  }
+
+  RefreshRequest copyWithWrapped({Wrapped<String?>? refreshToken}) {
+    return RefreshRequest(
+      refreshToken: (refreshToken != null
+          ? refreshToken.value
+          : this.refreshToken),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthRequest {
+  const AuthRequest({this.email, this.password});
+
+  factory AuthRequest.fromJson(Map<String, dynamic> json) =>
+      _$AuthRequestFromJson(json);
+
+  static const toJsonFactory = _$AuthRequestToJson;
+  Map<String, dynamic> toJson() => _$AuthRequestToJson(this);
+
+  @JsonKey(name: 'email')
+  final String? email;
+  @JsonKey(name: 'password')
+  final String? password;
+  static const fromJsonFactory = _$AuthRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthRequest &&
+            (identical(other.email, email) ||
+                const DeepCollectionEquality().equals(other.email, email)) &&
+            (identical(other.password, password) ||
+                const DeepCollectionEquality().equals(
+                  other.password,
+                  password,
+                )));
+  }
+
+  @override
+  String toString() => jsonEncode(this);
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(email) ^
+      const DeepCollectionEquality().hash(password) ^
+      runtimeType.hashCode;
+}
+
+extension $AuthRequestExtension on AuthRequest {
+  AuthRequest copyWith({String? email, String? password}) {
+    return AuthRequest(
+      email: email ?? this.email,
+      password: password ?? this.password,
+    );
+  }
+
+  AuthRequest copyWithWrapped({
+    Wrapped<String?>? email,
+    Wrapped<String?>? password,
+  }) {
+    return AuthRequest(
+      email: (email != null ? email.value : this.email),
+      password: (password != null ? password.value : this.password),
     );
   }
 }
