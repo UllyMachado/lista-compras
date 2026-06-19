@@ -114,7 +114,20 @@ O **go_router** gerencia a navegação com suporte a caminhos URL estruturados (
 
 ---
 
-## 4. Regras de Negócio do Sistema
+## 4. Estrutura da Entidade Principal
+
+Para suprir os requisitos estruturais e relacionais do negócio, a entidade principal `ShoppingList` conta com **7 atributos persistidos**:
+*   `id`: Identificador único (UUID/Long).
+*   `name`: Título ou nome da lista de compras.
+*   `budget`: Orçamento máximo estipulado pelo usuário.
+*   `description`: Descrição detalhada do objetivo da lista.
+*   `status`: Estado atual da lista (ex: "OPEN", "COMPLETED", "ERROR").
+*   `createdAt`: Timestamp de quando a lista foi criada.
+*   `items`: Lista de itens vinculados (Relacionamento 1:N com `ShoppingItem`).
+
+---
+
+## 5. Regras de Negócio do Sistema
 
 Para garantir a coerência e integridade dos dados e evitar entradas maliciosas ou fora do escopo prático de compras, o backend aplica rigidamente 3 regras de negócio cruciais na validação dos itens:
 
