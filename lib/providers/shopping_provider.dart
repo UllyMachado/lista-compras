@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' hide Category;
 import '../api/openapi.swagger.dart';
+import '../core/filter_enums.dart';
 
 class ShoppingProvider with ChangeNotifier {
   final Openapi _api;
@@ -7,6 +8,11 @@ class ShoppingProvider with ChangeNotifier {
   List<Category> _categories = [];
   String? _currentListId;
   bool _isLoading = false;
+
+  // --- Filter & Sort state (JP's individual feature) ---
+  String _searchQuery = '';
+  ItemStatusFilter _statusFilter = ItemStatusFilter.all;
+  ItemSortMode _sortMode = ItemSortMode.none;
 
   ShoppingProvider(this._api) {
     _fetchLists();
@@ -27,6 +33,100 @@ class ShoppingProvider with ChangeNotifier {
 
   double get budget => currentList?.budget ?? 0.0;
   List<ShoppingItem> get items => List.unmodifiable(currentList?.items ?? []);
+
+  // --- Filter & Sort getters and setters (JP's individual feature) ---
+  String get searchQuery => _searchQuery;
+  ItemStatusFilter get statusFilter => _statusFilter;
+  ItemSortMode get sortMode => _sortMode;
+
+  /// Whether any filter or sort is currently active.
+  bool get hasActiveFilters =>
+      _searchQuery.isNotEmpty ||
+      _statusFilter != ItemStatusFilter.all ||
+      _sortMode != ItemSortMode.none;
+
+  /// Returns the items of the current list after applying search, status filter, and sorting.
+  List<ShoppingItem> get filteredItems {
+    List<ShoppingItem> result = List.from(currentList?.items ?? []);
+
+    // 1. Text search filter (case-insensitive on description)
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      result = result.where((item) {
+        final desc = (item.description ?? '').toLowerCase();
+        final cat = (item.category?.name ?? '').toLowerCase();
+        return desc.contains(query) || cat.contains(query);
+      }).toList();
+    }
+
+    // 2. Status filter
+    switch (_statusFilter) {
+      case ItemStatusFilter.checked:
+        result = result.where((item) => item.isChecked ?? false).toList();
+        break;
+      case ItemStatusFilter.unchecked:
+        result = result.where((item) => !(item.isChecked ?? false)).toList();
+        break;
+      case ItemStatusFilter.all:
+        break;
+    }
+
+    // 3. Sorting
+    switch (_sortMode) {
+      case ItemSortMode.nameAsc:
+        result.sort((a, b) => (a.description ?? '').compareTo(b.description ?? ''));
+        break;
+      case ItemSortMode.nameDesc:
+        result.sort((a, b) => (b.description ?? '').compareTo(a.description ?? ''));
+        break;
+      case ItemSortMode.priceAsc:
+        result.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
+        break;
+      case ItemSortMode.priceDesc:
+        result.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
+        break;
+      case ItemSortMode.totalAsc:
+        result.sort((a, b) {
+          final totalA = (a.quantity ?? 1.0) * (a.price ?? 0.0);
+          final totalB = (b.quantity ?? 1.0) * (b.price ?? 0.0);
+          return totalA.compareTo(totalB);
+        });
+        break;
+      case ItemSortMode.totalDesc:
+        result.sort((a, b) {
+          final totalA = (a.quantity ?? 1.0) * (a.price ?? 0.0);
+          final totalB = (b.quantity ?? 1.0) * (b.price ?? 0.0);
+          return totalB.compareTo(totalA);
+        });
+        break;
+      case ItemSortMode.none:
+        break;
+    }
+
+    return List.unmodifiable(result);
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void setStatusFilter(ItemStatusFilter filter) {
+    _statusFilter = filter;
+    notifyListeners();
+  }
+
+  void setSortMode(ItemSortMode mode) {
+    _sortMode = mode;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _searchQuery = '';
+    _statusFilter = ItemStatusFilter.all;
+    _sortMode = ItemSortMode.none;
+    notifyListeners();
+  }
 
   double get currentBalance {
     if (currentList == null) return 0.0;
@@ -114,6 +214,10 @@ class ShoppingProvider with ChangeNotifier {
   void switchList(String id) {
     if (_lists.any((l) => l.id == id)) {
       _currentListId = id;
+      // Reset filters when switching to a different list for clean UX
+      _searchQuery = '';
+      _statusFilter = ItemStatusFilter.all;
+      _sortMode = ItemSortMode.none;
       notifyListeners();
     }
   }
