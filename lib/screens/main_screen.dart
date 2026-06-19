@@ -236,84 +236,88 @@ class _MainScreenState extends State<MainScreen> {
                                 color: Theme.of(
                                   context,
                                 ).scaffoldBackgroundColor,
-                                child: Stack(
-                                  alignment: Alignment.center,
+                                child: Row(
                                   children: [
-                                    GestureDetector(
-                                      onTap: () => _showRenameDialog(
-                                        context,
-                                        currentListModel,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            currentListModel.name ?? 'Sem Nome',
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                    Expanded(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: GestureDetector(
+                                          onTap: () => _showRenameDialog(
+                                            context,
+                                            currentListModel,
                                           ),
-                                          const SizedBox(width: 8),
-                                          const Icon(
-                                            Icons.edit,
-                                            color: Colors.white70,
-                                            size: 18,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  currentListModel.name ?? 'Sem Nome',
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Icon(
+                                                Icons.edit,
+                                                color: Colors.white70,
+                                                size: 18,
+                                              ),
+                                            ],
                                           ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline,
-                                              color: AppTheme.danger,
-                                            ),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            onPressed: () => _showDeleteDialog(
-                                              context,
-                                              currentListModel,
-                                            ),
+                                    const SizedBox(width: 16),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                            color: AppTheme.danger,
                                           ),
-                                          const SizedBox(width: 16),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.analytics_outlined,
-                                              color: Colors.white,
-                                            ),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            onPressed: () {
-                                              showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                backgroundColor: Colors.transparent,
-                                                builder: (context) => ShoppingListSummary(
-                                                  list: currentListModel,
-                                                ),
-                                              );
-                                            },
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => _showDeleteDialog(
+                                            context,
+                                            currentListModel,
                                           ),
-                                          const SizedBox(width: 16),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.share,
-                                              color: Colors.white,
-                                            ),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            onPressed: () => ShoppingListSummary.shareList(currentListModel),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.analytics_outlined,
+                                            color: Colors.white,
                                           ),
-                                        ],
-                                      ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              backgroundColor: Colors.transparent,
+                                              builder: (context) => ShoppingListSummary(
+                                                list: currentListModel,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(width: 16),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.share,
+                                            color: Colors.white,
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => ShoppingListSummary.shareList(currentListModel),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -586,20 +590,16 @@ class _MainScreenState extends State<MainScreen> {
                                                                   const SizedBox(
                                                                     width: 4,
                                                                   ),
-                                                                  Text(
-                                                                    item.category!
-                                                                            .name ??
-                                                                        '',
-                                                                    style: TextStyle(
-                                                                      color: textColor
-                                                                          .withValues(
-                                                                            alpha:
-                                                                                0.6,
-                                                                          ),
-                                                                      fontSize: 11,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500,
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      item.category!.name ?? '',
+                                                                      style: TextStyle(
+                                                                        color: textColor.withValues(alpha: 0.6),
+                                                                        fontSize: 11,
+                                                                        fontWeight: FontWeight.w500,
+                                                                      ),
+                                                                      maxLines: 1,
+                                                                      overflow: TextOverflow.ellipsis,
                                                                     ),
                                                                   ),
                                                                 ],
