@@ -586,20 +586,16 @@ class _MainScreenState extends State<MainScreen> {
                                                                   const SizedBox(
                                                                     width: 4,
                                                                   ),
-                                                                  Text(
-                                                                    item.category!
-                                                                            .name ??
-                                                                        '',
-                                                                    style: TextStyle(
-                                                                      color: textColor
-                                                                          .withValues(
-                                                                            alpha:
-                                                                                0.6,
-                                                                          ),
-                                                                      fontSize: 11,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500,
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      item.category!.name ?? '',
+                                                                      style: TextStyle(
+                                                                        color: textColor.withValues(alpha: 0.6),
+                                                                        fontSize: 11,
+                                                                        fontWeight: FontWeight.w500,
+                                                                      ),
+                                                                      maxLines: 1,
+                                                                      overflow: TextOverflow.ellipsis,
                                                                     ),
                                                                   ),
                                                                 ],
