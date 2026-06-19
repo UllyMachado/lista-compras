@@ -6,6 +6,8 @@ import '../providers/shopping_provider.dart';
 
 import '../core/theme.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/shopping_list_summary.dart';
+import '../widgets/category_icon.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -284,24 +286,31 @@ class _MainScreenState extends State<MainScreen> {
                                           const SizedBox(width: 16),
                                           IconButton(
                                             icon: const Icon(
-                                              Icons.share,
+                                              Icons.analytics_outlined,
                                               color: Colors.white,
                                             ),
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(),
                                             onPressed: () {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Link copiado para a área de transferência!',
-                                                  ),
-                                                  backgroundColor:
-                                                      AppTheme.success,
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                backgroundColor: Colors.transparent,
+                                                builder: (context) => ShoppingListSummary(
+                                                  list: currentListModel,
                                                 ),
                                               );
                                             },
+                                          ),
+                                          const SizedBox(width: 16),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.share,
+                                              color: Colors.white,
+                                            ),
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            onPressed: () => ShoppingListSummary.shareList(currentListModel),
                                           ),
                                         ],
                                       ),
@@ -429,9 +438,9 @@ class _MainScreenState extends State<MainScreen> {
                                                 ),
                                               ),
                                               confirmDismiss: (direction) async {
-                                                if (listIndex !=
-                                                    _lastSyncedListIndex)
+                                                if (listIndex != _lastSyncedListIndex) {
                                                   return false;
+                                                }
                                                 return await showDialog(
                                                   context: context,
                                                   builder: (BuildContext context) {
@@ -486,12 +495,12 @@ class _MainScreenState extends State<MainScreen> {
                                               },
                                               child: InkWell(
                                                 onTap: () {
-                                                  if (listIndex ==
-                                                      _lastSyncedListIndex)
+                                                  if (listIndex == _lastSyncedListIndex) {
                                                     context.push(
                                                       '/edit',
                                                       extra: item.id!,
                                                     );
+                                                  }
                                                 },
                                                 child: Padding(
                                                   padding:
@@ -561,22 +570,39 @@ class _MainScreenState extends State<MainScreen> {
                                                               const SizedBox(
                                                                 height: 2,
                                                               ),
-                                                              Text(
-                                                                item
-                                                                        .category!
-                                                                        .name ??
-                                                                    '',
-                                                                style: TextStyle(
-                                                                  color: textColor
-                                                                      .withValues(
-                                                                        alpha:
-                                                                            0.6,
-                                                                      ),
-                                                                  fontSize: 11,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
+                                                              Row(
+                                                                children: [
+                                                                  Icon(
+                                                                    getCategoryIcon(
+                                                                      item.category!.name,
+                                                                    ),
+                                                                    size: 12,
+                                                                    color: textColor
+                                                                        .withValues(
+                                                                          alpha:
+                                                                              0.6,
+                                                                        ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                    width: 4,
+                                                                  ),
+                                                                  Text(
+                                                                    item.category!
+                                                                            .name ??
+                                                                        '',
+                                                                    style: TextStyle(
+                                                                      color: textColor
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.6,
+                                                                          ),
+                                                                      fontSize: 11,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ],
                                                           ],
@@ -621,13 +647,12 @@ class _MainScreenState extends State<MainScreen> {
                                                                     textColor,
                                                               ),
                                                               onPressed: () {
-                                                                if (listIndex ==
-                                                                    _lastSyncedListIndex)
-                                                                  providerForSync
-                                                                      .updateQuantity(
-                                                                        item.id!,
-                                                                        -1,
-                                                                      );
+                                                                if (listIndex == _lastSyncedListIndex) {
+                                                                  providerForSync.updateQuantity(
+                                                                    item.id!,
+                                                                    -1,
+                                                                  );
+                                                                }
                                                               },
                                                             ),
                                                             Text(
@@ -677,13 +702,12 @@ class _MainScreenState extends State<MainScreen> {
                                                                     textColor,
                                                               ),
                                                               onPressed: () {
-                                                                if (listIndex ==
-                                                                    _lastSyncedListIndex)
-                                                                  providerForSync
-                                                                      .updateQuantity(
-                                                                        item.id!,
-                                                                        1,
-                                                                      );
+                                                                if (listIndex == _lastSyncedListIndex) {
+                                                                  providerForSync.updateQuantity(
+                                                                    item.id!,
+                                                                    1,
+                                                                  );
+                                                                }
                                                               },
                                                             ),
                                                           ],
