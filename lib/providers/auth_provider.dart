@@ -11,9 +11,10 @@ class AuthProvider with ChangeNotifier {
 
   bool get isAuthenticated => _isAuthenticated;
 
-  /// Attempts auto-login using stored refresh token.
-  /// Called once at app startup before rendering.
+  /// AUTO-LOGIN ROUTINE: Evaluates if the user has a valid active session.
+  /// This is called during the application startup process before routing takes place.
   Future<void> tryAutoLogin() async {
+    // 1. Verify if refresh tokens exist in the secure storage.
     final hasTokens = await _tokenStorage.hasTokens();
     if (!hasTokens) {
       _isAuthenticated = false;
@@ -29,17 +30,23 @@ class AuthProvider with ChangeNotifier {
     }
 
     try {
+      // 2. Validate the refresh token with the server by requesting a fresh access token.
       final response = await _authService.refresh(refreshToken);
+      
+      // 3. Save the new set of JWT keys to maintain session longevity.
       await _tokenStorage.saveTokens(
         response.accessToken,
         response.refreshToken,
       );
       _isAuthenticated = true;
     } catch (e) {
+      // 4. If refresh token is expired/invalid, clear local secure storage.
       debugPrint('Auto-login failed: $e');
       await _tokenStorage.clearTokens();
       _isAuthenticated = false;
     }
+    
+    // Notify router configuration of the auth state update to route to Dashboard or Login.
     notifyListeners();
   }
 
