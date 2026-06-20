@@ -1,12 +1,12 @@
 import 'package:go_router/go_router.dart';
-import '../screens/login_screen.dart';
-import '../screens/main_screen.dart';
-import '../screens/edit_item_screen.dart';
-import '../screens/manage_lists_screen.dart';
-import '../screens/create_list_screen.dart';
-import '../screens/create_recipe_screen.dart';
-import '../screens/manage_categories_screen.dart';
-import '../providers/auth_provider.dart';
+import '../presentation/screens/login_screen.dart';
+import '../presentation/screens/main_screen.dart';
+import '../presentation/screens/edit_item_screen.dart';
+import '../presentation/screens/manage_lists_screen.dart';
+import '../presentation/screens/create_list_screen.dart';
+import '../presentation/screens/create_recipe_screen.dart';
+import '../presentation/screens/manage_categories_screen.dart';
+import '../presentation/state/auth_provider.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
@@ -55,3 +55,5 @@ GoRouter createRouter(AuthProvider authProvider) {
     ],
   );
 }
+
+

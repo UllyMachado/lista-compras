@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/shopping_provider.dart';
-import '../core/theme.dart';
+import '../state/shopping_provider.dart';
+import '../../core/theme.dart';
 import '../widgets/app_drawer.dart';
 
 class CreateListScreen extends StatefulWidget {
@@ -102,3 +102,5 @@ class _CreateListScreenState extends State<CreateListScreen> {
     super.dispose();
   }
 }
+
+

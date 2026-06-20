@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:chopper/chopper.dart';
 import 'package:flutter/foundation.dart';
-import 'token_storage.dart';
-import 'auth_service.dart';
-import '../core/globals.dart';
+import '../../data/datasources/local/token_local_datasource.dart';
+import '../../data/datasources/remote/auth_remote_datasource.dart';
+import '../globals.dart';
 
 /// Chopper Interceptor that injects the Bearer token into every request
 /// and handles automatic token refresh on 401 responses.
@@ -65,4 +65,5 @@ class AuthInterceptor implements Interceptor {
     return response;
   }
 }
+
 

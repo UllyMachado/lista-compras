@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
-import 'core/config.dart';
 import 'package:provider/provider.dart';
+import 'core/config.dart';
 import 'core/theme.dart';
 import 'core/globals.dart';
 import 'core/router.dart';
-import 'providers/auth_provider.dart';
-import 'providers/shopping_provider.dart';
-import 'api/openapi.swagger.dart';
-import 'services/auth_service.dart';
-import 'services/token_storage.dart';
-import 'services/auth_interceptor.dart';
+import 'presentation/state/auth_provider.dart';
+import 'presentation/state/shopping_provider.dart';
+import 'data/datasources/remote/api/openapi.swagger.dart';
+import 'data/datasources/remote/auth_remote_datasource.dart';
+import 'data/datasources/local/token_local_datasource.dart';
+import 'core/network/auth_interceptor.dart';
+import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/shopping_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final tokenStorage = TokenStorage();
   final authService = AuthService();
-  final authProvider = AuthProvider(authService, tokenStorage);
+  final authRepository = AuthRepositoryImpl(authService, tokenStorage);
+  final authProvider = AuthProvider(authRepository);
 
   // Try to restore session from stored tokens
   await authProvider.tryAutoLogin();
@@ -55,7 +58,8 @@ class MyApp extends StatelessWidget {
                 }),
               ],
             );
-            return ShoppingProvider(api);
+            final shoppingRepository = ShoppingRepositoryImpl(api);
+            return ShoppingProvider(shoppingRepository);
           },
         ),
       ],

@@ -54,6 +54,7 @@ dev_dependencies:
   swagger_dart_code_generator: any
   chopper_generator: any
   json_serializable: any
+  mocktail: ^1.0.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

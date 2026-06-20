@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../providers/shopping_provider.dart';
-import '../core/filter_enums.dart';
+import '../state/shopping_provider.dart';
+import '../../core/filter_enums.dart';
 
-import '../core/theme.dart';
+import '../../core/theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/shopping_list_summary.dart';
 import '../widgets/category_icon.dart';
@@ -1267,3 +1267,5 @@ class _BudgetTextFieldState extends State<_BudgetTextField> {
     );
   }
 }
+
+

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../core/config.dart';
+import '../../../../core/config.dart';
 
 class AuthTokenResponse {
   final String accessToken;
@@ -52,3 +52,4 @@ class AuthService {
     return AuthTokenResponse.fromJson(response.data);
   }
 }
+

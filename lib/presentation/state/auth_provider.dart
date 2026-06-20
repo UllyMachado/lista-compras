@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
-import '../services/auth_service.dart';
-import '../services/token_storage.dart';
-import '../core/globals.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../core/globals.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService;
-  final TokenStorage _tokenStorage;
+  final AuthRepository _authRepository;
   bool _isAuthenticated = false;
 
-  AuthProvider(this._authService, this._tokenStorage);
+  AuthProvider(this._authRepository);
 
   bool get isAuthenticated => _isAuthenticated;
 
@@ -16,14 +14,7 @@ class AuthProvider with ChangeNotifier {
   /// This is called during the application startup process before routing takes place.
   Future<void> tryAutoLogin() async {
     // 1. Verify if refresh tokens exist in the secure storage.
-    final hasTokens = await _tokenStorage.hasTokens();
-    if (!hasTokens) {
-      _isAuthenticated = false;
-      notifyListeners();
-      return;
-    }
-
-    final refreshToken = await _tokenStorage.getRefreshToken();
+    final refreshToken = await _authRepository.getRefreshToken();
     if (refreshToken == null) {
       _isAuthenticated = false;
       notifyListeners();
@@ -32,10 +23,10 @@ class AuthProvider with ChangeNotifier {
 
     try {
       // 2. Validate the refresh token with the server by requesting a fresh access token.
-      final response = await _authService.refresh(refreshToken);
+      final response = await _authRepository.refresh(refreshToken);
       
       // 3. Save the new set of JWT keys to maintain session longevity.
-      await _tokenStorage.saveTokens(
+      await _authRepository.saveTokens(
         response.accessToken,
         response.refreshToken,
       );
@@ -43,7 +34,7 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       // 4. If refresh token is expired/invalid, clear local secure storage.
       debugPrint('Auto-login failed: $e');
-      await _tokenStorage.clearTokens();
+      await _authRepository.clearTokens();
       _isAuthenticated = false;
     }
     
@@ -54,8 +45,8 @@ class AuthProvider with ChangeNotifier {
   /// Authenticates via the REST API and stores tokens.
   Future<bool> login(String email, String password) async {
     try {
-      final response = await _authService.login(email, password);
-      await _tokenStorage.saveTokens(
+      final response = await _authRepository.login(email, password);
+      await _authRepository.saveTokens(
         response.accessToken,
         response.refreshToken,
       );
@@ -72,7 +63,7 @@ class AuthProvider with ChangeNotifier {
 
   /// Clears all tokens and ends the session.
   Future<void> logout() async {
-    await _tokenStorage.clearTokens();
+    await _authRepository.clearTokens();
     _isAuthenticated = false;
     notifyListeners();
   }

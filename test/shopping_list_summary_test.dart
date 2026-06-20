@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lista_compras/api/openapi.swagger.dart';
-import 'package:lista_compras/widgets/shopping_list_summary.dart';
+import 'package:lista_compras/data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/presentation/widgets/shopping_list_summary.dart';
 import 'package:share_plus_platform_interface/share_plus_platform_interface.dart';
 
 class MockSharePlatform extends SharePlatform {
@@ -203,3 +203,5 @@ void main() {
     expect(sharedText, contains('[ ] 2 und Detergente - R\$ 2,50 (Cat: Limpeza)'));
   });
 }
+
+

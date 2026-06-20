@@ -1,21 +1,22 @@
 import 'package:flutter/foundation.dart' hide Category;
-import '../api/openapi.swagger.dart';
-import '../core/filter_enums.dart';
-import '../core/globals.dart';
+import '../../data/datasources/remote/api/openapi.swagger.dart';
+import '../../domain/repositories/shopping_repository.dart';
+import '../../core/filter_enums.dart';
+import '../../core/globals.dart';
 
 class ShoppingProvider with ChangeNotifier {
-  final Openapi _api;
+  final ShoppingRepository _repository;
   List<ShoppingList> _lists = [];
   List<Category> _categories = [];
   String? _currentListId;
   bool _isLoading = false;
 
-  // --- Filter & Sort state (JP's individual feature) ---
+  // --- Filter & Sort state ---
   String _searchQuery = '';
   ItemStatusFilter _statusFilter = ItemStatusFilter.all;
   ItemSortMode _sortMode = ItemSortMode.none;
 
-  ShoppingProvider(this._api) {
+  ShoppingProvider(this._repository) {
     _fetchLists();
     fetchCategories();
   }
@@ -35,22 +36,18 @@ class ShoppingProvider with ChangeNotifier {
   double get budget => currentList?.budget ?? 0.0;
   List<ShoppingItem> get items => List.unmodifiable(currentList?.items ?? []);
 
-  // --- Filter & Sort getters and setters (JP's individual feature) ---
   String get searchQuery => _searchQuery;
   ItemStatusFilter get statusFilter => _statusFilter;
   ItemSortMode get sortMode => _sortMode;
 
-  /// Whether any filter or sort is currently active.
   bool get hasActiveFilters =>
       _searchQuery.isNotEmpty ||
       _statusFilter != ItemStatusFilter.all ||
       _sortMode != ItemSortMode.none;
 
-  /// Returns the items of the current list after applying search, status filter, and sorting.
   List<ShoppingItem> get filteredItems {
     List<ShoppingItem> result = List.from(currentList?.items ?? []);
 
-    // 1. Text search filter (case-insensitive on description)
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       result = result.where((item) {
@@ -60,7 +57,6 @@ class ShoppingProvider with ChangeNotifier {
       }).toList();
     }
 
-    // 2. Status filter
     switch (_statusFilter) {
       case ItemStatusFilter.checked:
         result = result.where((item) => item.isChecked ?? false).toList();
@@ -72,7 +68,6 @@ class ShoppingProvider with ChangeNotifier {
         break;
     }
 
-    // 3. Sorting
     switch (_sortMode) {
       case ItemSortMode.nameAsc:
         result.sort((a, b) => (a.description ?? '').compareTo(b.description ?? ''));
@@ -144,12 +139,9 @@ class ShoppingProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await _api.apiListsGet();
-      if (response.isSuccessful && response.body != null) {
-        _lists = response.body!;
-        if (_currentListId == null && _lists.isNotEmpty) {
-          _currentListId = _lists.first.id;
-        }
+      _lists = await _repository.getLists();
+      if (_currentListId == null && _lists.isNotEmpty) {
+        _currentListId = _lists.first.id;
       }
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao buscar listas.');
@@ -165,13 +157,9 @@ class ShoppingProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await _api.apiListsPost(
-        body: ShoppingList(name: name, budget: 0.0),
-      );
-      if (response.isSuccessful && response.body != null) {
-        _lists.add(response.body!);
-        _currentListId = response.body!.id;
-      }
+      final newList = await _repository.createList(name);
+      _lists.add(newList);
+      _currentListId = newList.id;
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao criar lista.');
       debugPrint("Error creating list: $e");
@@ -185,15 +173,10 @@ class ShoppingProvider with ChangeNotifier {
     if (newName.trim().isEmpty) return;
     final list = _lists.firstWhere((l) => l.id == id);
     try {
-      final response = await _api.apiListsIdPut(
-        id: id,
-        body: list.copyWith(name: newName),
-      );
-      if (response.isSuccessful && response.body != null) {
-        final index = _lists.indexWhere((l) => l.id == id);
-        _lists[index] = response.body!;
-        notifyListeners();
-      }
+      final updatedList = await _repository.updateList(id, list.copyWith(name: newName));
+      final index = _lists.indexWhere((l) => l.id == id);
+      _lists[index] = updatedList;
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao renomear lista.');
       debugPrint("Error renaming list: $e");
@@ -202,14 +185,12 @@ class ShoppingProvider with ChangeNotifier {
 
   Future<void> deleteList(String id) async {
     try {
-      final response = await _api.apiListsIdDelete(id: id);
-      if (response.isSuccessful) {
-        _lists.removeWhere((l) => l.id == id);
-        if (_currentListId == id) {
-          _currentListId = _lists.isNotEmpty ? _lists.first.id : null;
-        }
-        notifyListeners();
+      await _repository.deleteList(id);
+      _lists.removeWhere((l) => l.id == id);
+      if (_currentListId == id) {
+        _currentListId = _lists.isNotEmpty ? _lists.first.id : null;
       }
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao excluir lista.');
       debugPrint("Error deleting list: $e");
@@ -219,7 +200,6 @@ class ShoppingProvider with ChangeNotifier {
   void switchList(String id) {
     if (_lists.any((l) => l.id == id)) {
       _currentListId = id;
-      // Reset filters when switching to a different list for clean UX
       _searchQuery = '';
       _statusFilter = ItemStatusFilter.all;
       _sortMode = ItemSortMode.none;
@@ -230,15 +210,10 @@ class ShoppingProvider with ChangeNotifier {
   Future<void> setBudget(double newValue) async {
     if (currentList == null) return;
     try {
-      final response = await _api.apiListsIdPut(
-        id: currentList!.id,
-        body: currentList!.copyWith(budget: newValue),
-      );
-      if (response.isSuccessful && response.body != null) {
-        final index = _lists.indexWhere((l) => l.id == currentList!.id);
-        _lists[index] = response.body!;
-        notifyListeners();
-      }
+      final updatedList = await _repository.updateList(currentList!.id!, currentList!.copyWith(budget: newValue));
+      final index = _lists.indexWhere((l) => l.id == currentList!.id);
+      _lists[index] = updatedList;
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao definir orçamento.');
       debugPrint("Error setting budget: $e");
@@ -248,17 +223,12 @@ class ShoppingProvider with ChangeNotifier {
   Future<void> addItem(ShoppingItem item) async {
     if (currentList == null || currentList!.id == null) return;
     try {
-      final response = await _api.apiListsListIdItemsPost(
-        listId: currentList!.id,
-        body: item,
-      );
-      if (response.isSuccessful && response.body != null) {
-        final index = _lists.indexWhere((l) => l.id == currentList!.id);
-        final currentItems = List<ShoppingItem>.from(_lists[index].items ?? []);
-        currentItems.add(response.body!);
-        _lists[index] = _lists[index].copyWith(items: currentItems);
-        notifyListeners();
-      }
+      final newItem = await _repository.addItem(currentList!.id!, item);
+      final index = _lists.indexWhere((l) => l.id == currentList!.id);
+      final currentItems = List<ShoppingItem>.from(_lists[index].items ?? []);
+      currentItems.add(newItem);
+      _lists[index] = _lists[index].copyWith(items: currentItems);
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao adicionar item.');
       debugPrint("Error adding item: $e");
@@ -268,20 +238,14 @@ class ShoppingProvider with ChangeNotifier {
   Future<void> updateItem(String itemId, ShoppingItem updatedItem) async {
     if (currentList == null || currentList!.id == null) return;
     try {
-      final response = await _api.apiListsListIdItemsItemIdPut(
-        listId: currentList!.id,
-        itemId: itemId,
-        body: updatedItem,
-      );
-      if (response.isSuccessful && response.body != null) {
-        final index = _lists.indexWhere((l) => l.id == currentList!.id);
-        final currentItems = List<ShoppingItem>.from(_lists[index].items ?? []);
-        final itemIndex = currentItems.indexWhere((i) => i.id == itemId);
-        if (itemIndex != -1) {
-          currentItems[itemIndex] = response.body!;
-          _lists[index] = _lists[index].copyWith(items: currentItems);
-          notifyListeners();
-        }
+      final resultItem = await _repository.updateItem(currentList!.id!, itemId, updatedItem);
+      final index = _lists.indexWhere((l) => l.id == currentList!.id);
+      final currentItems = List<ShoppingItem>.from(_lists[index].items ?? []);
+      final itemIndex = currentItems.indexWhere((i) => i.id == itemId);
+      if (itemIndex != -1) {
+        currentItems[itemIndex] = resultItem;
+        _lists[index] = _lists[index].copyWith(items: currentItems);
+        notifyListeners();
       }
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao atualizar item.');
@@ -292,17 +256,12 @@ class ShoppingProvider with ChangeNotifier {
   Future<void> removeItem(String itemId) async {
     if (currentList == null || currentList!.id == null) return;
     try {
-      final response = await _api.apiListsListIdItemsItemIdDelete(
-        listId: currentList!.id,
-        itemId: itemId,
-      );
-      if (response.isSuccessful) {
-        final index = _lists.indexWhere((l) => l.id == currentList!.id);
-        final currentItems = List<ShoppingItem>.from(_lists[index].items ?? []);
-        currentItems.removeWhere((i) => i.id == itemId);
-        _lists[index] = _lists[index].copyWith(items: currentItems);
-        notifyListeners();
-      }
+      await _repository.deleteItem(currentList!.id!, itemId);
+      final index = _lists.indexWhere((l) => l.id == currentList!.id);
+      final currentItems = List<ShoppingItem>.from(_lists[index].items ?? []);
+      currentItems.removeWhere((i) => i.id == itemId);
+      _lists[index] = _lists[index].copyWith(items: currentItems);
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao excluir item.');
       debugPrint("Error removing item: $e");
@@ -330,19 +289,7 @@ class ShoppingProvider with ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-
-      final response = await _api.apiAiRecipeToListPost(
-        body: RecipeRequest(recipe: recipe),
-      );
-
-      if (response.isSuccessful && response.body != null) {
-        return response.body;
-      } else {
-        debugPrint(
-          "Failed to parse recipe: ${response.statusCode} - ${response.error}",
-        );
-        return null;
-      }
+      return await _repository.parseRecipe(recipe);
     } catch (e) {
       showErrorSnackBar('Erro ao processar receita com inteligência artificial.');
       debugPrint("Error parsing recipe: $e");
@@ -357,14 +304,11 @@ class ShoppingProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await _api.apiListsPost(body: list);
-      if (response.isSuccessful && response.body != null) {
-        _lists.add(response.body!);
-        _currentListId = response.body!.id;
-        notifyListeners();
-        return true;
-      }
-      return false;
+      final newList = await _repository.createListWithItems(list);
+      _lists.add(newList);
+      _currentListId = newList.id;
+      notifyListeners();
+      return true;
     } catch (e) {
       showErrorSnackBar('Erro ao criar lista a partir dos itens.');
       debugPrint("Error creating list with items: $e");
@@ -379,11 +323,8 @@ class ShoppingProvider with ChangeNotifier {
 
   Future<void> fetchCategories() async {
     try {
-      final response = await _api.apiCategoriesGet();
-      if (response.isSuccessful && response.body != null) {
-        _categories = response.body!;
-        notifyListeners();
-      }
+      _categories = await _repository.getCategories();
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao buscar categorias.');
       debugPrint("Error fetching categories: $e");
@@ -392,13 +333,9 @@ class ShoppingProvider with ChangeNotifier {
 
   Future<void> createCategory(String name, String description) async {
     try {
-      final response = await _api.apiCategoriesPost(
-        body: Category(name: name, description: description),
-      );
-      if (response.isSuccessful && response.body != null) {
-        _categories.add(response.body!);
-        notifyListeners();
-      }
+      final newCat = await _repository.createCategory(Category(name: name, description: description));
+      _categories.add(newCat);
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao criar categoria.');
       debugPrint("Error creating category: $e");
@@ -411,51 +348,16 @@ class ShoppingProvider with ChangeNotifier {
     String description,
   ) async {
     try {
-      final response = await _api.apiCategoriesIdPut(
-        id: id,
-        body: Category(id: id, name: name, description: description),
-      );
-      if (response.isSuccessful && response.body != null) {
-        final index = _categories.indexWhere((c) => c.id == id);
-        if (index != -1) {
-          _categories[index] = response.body!;
-          // Also update categories within cached lists
-          for (var i = 0; i < _lists.length; i++) {
-            final items = List<ShoppingItem>.from(_lists[i].items ?? []);
-            bool updated = false;
-            for (var j = 0; j < items.length; j++) {
-              if (items[j].category?.id == id) {
-                items[j] = items[j].copyWith(category: response.body!);
-                updated = true;
-              }
-            }
-            if (updated) {
-              _lists[i] = _lists[i].copyWith(items: items);
-            }
-          }
-          notifyListeners();
-        }
-      }
-    } catch (e) {
-      showErrorSnackBar('Erro de conexão ao atualizar categoria.');
-      debugPrint("Error updating category: $e");
-    }
-  }
-
-  Future<void> deleteCategory(String id) async {
-    try {
-      final response = await _api.apiCategoriesIdDelete(id: id);
-      if (response.isSuccessful) {
-        _categories.removeWhere((c) => c.id == id);
-        // Null out category for items referencing the deleted one
+      final updatedCat = await _repository.updateCategory(id, Category(id: id, name: name, description: description));
+      final index = _categories.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        _categories[index] = updatedCat;
         for (var i = 0; i < _lists.length; i++) {
           final items = List<ShoppingItem>.from(_lists[i].items ?? []);
           bool updated = false;
           for (var j = 0; j < items.length; j++) {
             if (items[j].category?.id == id) {
-              items[j] = items[j].copyWithWrapped(
-                category: const Wrapped.value(null),
-              );
+              items[j] = items[j].copyWith(category: updatedCat);
               updated = true;
             }
           }
@@ -465,6 +367,32 @@ class ShoppingProvider with ChangeNotifier {
         }
         notifyListeners();
       }
+    } catch (e) {
+      showErrorSnackBar('Erro de conexão ao atualizar categoria.');
+      debugPrint("Error updating category: $e");
+    }
+  }
+
+  Future<void> deleteCategory(String id) async {
+    try {
+      await _repository.deleteCategory(id);
+      _categories.removeWhere((c) => c.id == id);
+      for (var i = 0; i < _lists.length; i++) {
+        final items = List<ShoppingItem>.from(_lists[i].items ?? []);
+        bool updated = false;
+        for (var j = 0; j < items.length; j++) {
+          if (items[j].category?.id == id) {
+            items[j] = items[j].copyWithWrapped(
+              category: const Wrapped.value(null),
+            );
+            updated = true;
+          }
+        }
+        if (updated) {
+          _lists[i] = _lists[i].copyWith(items: items);
+        }
+      }
+      notifyListeners();
     } catch (e) {
       showErrorSnackBar('Erro de conexão ao excluir categoria.');
       debugPrint("Error deleting category: $e");

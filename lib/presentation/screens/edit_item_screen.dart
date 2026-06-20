@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../api/openapi.swagger.dart';
-import '../providers/shopping_provider.dart';
-import '../core/theme.dart';
+import '../../data/datasources/remote/api/openapi.swagger.dart';
+import '../state/shopping_provider.dart';
+import '../../core/theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/category_icon.dart';
 
@@ -439,3 +439,5 @@ class _EditItemScreenState extends State<EditItemScreen> {
     super.dispose();
   }
 }
+
+

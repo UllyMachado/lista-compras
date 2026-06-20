@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../api/openapi.swagger.dart';
-import '../core/theme.dart';
+import '../../data/datasources/remote/api/openapi.swagger.dart';
+import '../../core/theme.dart';
 
 class ShoppingListSummary extends StatelessWidget {
   final ShoppingList list;
@@ -428,3 +428,6 @@ class ShoppingListSummary extends StatelessWidget {
     Share.share(sb.toString(), subject: 'Lista de Compras: ${list.name ?? "Sem Nome"}');
   }
 }
+
+
+
