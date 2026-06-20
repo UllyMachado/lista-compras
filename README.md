@@ -65,7 +65,7 @@ O projeto utiliza um conjunto de bibliotecas modernas que atendem aos padrões d
     ```bash
     ./gradlew bootRun
     ```
-    *O backend rodará em `http://localhost:8090` e criará automaticamente o banco SQLite local (`lista-compras.db`).*
+    *O backend rodará em `http://localhost:8090` e criará automaticamente as tabelas no banco PostgreSQL local (`lista_compras`).*
 
 ---
 

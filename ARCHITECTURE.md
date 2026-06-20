@@ -26,7 +26,7 @@ graph TD
     subgraph Backend ["Backend REST (Spring Boot)"]
         H[Controllers / Endpoints]
         I[Services / Business Logic]
-        J[SQLite Database]
+        J[PostgreSQL Database]
     end
 
     A -->|Consome / Escuta| B
@@ -149,4 +149,4 @@ Para garantir a coerência e integridade dos dados e evitar entradas maliciosas 
 *   **Arquitetura Baseada em Interceptores:** Centralizar a lógica de renovação silenciosa de tokens no `AuthInterceptor` evita a necessidade de tratar expirações em cada chamada REST individualmente na camada de UI.
 *   **Feedback Visual Desacoplado (GlobalKey):** Utilização de uma `scaffoldMessengerKey` global injetada no `MaterialApp` para permitir que classes puras de lógica (`Providers` e `Interceptors`) emitam *SnackBars* (erros de rede, expiração de sessão) sem depender ou exigir o repasse de `BuildContext` nas funções.
 *   **Filtragem e Ordenação no Client-Side:** As features de busca por texto, filtro de status e ordenação (A-Z, Preço, etc.) foram implementadas mantendo o estado localmente no `ShoppingProvider` (ao invés de fazer requisições a cada letra digitada). Isso economiza banda, minimiza carga no backend e garante feedback imediato.
-*   **SQLite como Banco de Dados do Backend:** SQLite foi selecionado para persistência do Spring Boot por ser um motor embarcado que não exige gerenciamento ou instalação de servidores externos (como MySQL ou PostgreSQL), facilitando a portabilidade e permitindo rodar a aplicação imediatamente.
+*   **PostgreSQL como Banco de Dados do Backend:** PostgreSQL foi selecionado para persistência do Spring Boot por ser um banco de dados relacional robusto e escalável, adequando-se melhor a ambientes de produção e atendendo aos requisitos do sistema.
