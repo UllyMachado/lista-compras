@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../state/shopping_provider.dart';
-import '../../data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 import '../../core/theme.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/category_icon.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   const CreateRecipeScreen({super.key});
@@ -34,6 +35,22 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           : '0.00',
     );
     ShoppingItemUnit selectedUnit = item.unit ?? ShoppingItemUnit.und;
+    
+    final provider = context.read<ShoppingProvider>();
+    Category? selectedCategory;
+    if (item.category != null) {
+      try {
+        selectedCategory = provider.categories.firstWhere((c) => c.id == item.category!.id);
+      } catch (_) {
+        selectedCategory = item.category;
+      }
+    } else {
+      try {
+        selectedCategory = provider.categories.firstWhere((c) => c.name == 'Outros');
+      } catch (_) {
+        selectedCategory = null;
+      }
+    }
 
     showDialog(
       context: context,
@@ -67,10 +84,42 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           : null,
                     ),
                     const SizedBox(height: 16),
+                    DropdownButtonFormField<Category?>(
+                      initialValue: selectedCategory,
+                      dropdownColor: AppTheme.background,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Categoria',
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      items: provider.categories.map((cat) {
+                        return DropdownMenuItem<Category?>(
+                          value: cat,
+                          child: Row(
+                            children: [
+                              Icon(
+                                getCategoryIcon(cat.name),
+                                size: 20,
+                                color: AppTheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(cat.name ?? '', style: const TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setSubState(() {
+                          selectedCategory = val;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          flex: 2,
+                          flex: 3,
                           child: TextFormField(
                             controller: qtyController,
                             keyboardType: const TextInputType.numberWithOptions(
@@ -91,7 +140,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 12),
                         Expanded(
                           flex: 2,
                           child: DropdownButtonFormField<ShoppingItemUnit>(
@@ -103,11 +152,6 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               labelStyle: TextStyle(color: Colors.white70),
                             ),
                             items: ShoppingItemUnit.values
-                                .where(
-                                  (u) =>
-                                      u !=
-                                      ShoppingItemUnit.swaggerGeneratedUnknown,
-                                )
                                 .map((unit) {
                                   return DropdownMenuItem(
                                     value: unit,
@@ -129,30 +173,27 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          flex: 3,
-                          child: TextFormField(
-                            controller: priceController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              labelText: 'Preço (R\$)',
-                              labelStyle: TextStyle(color: Colors.white70),
-                            ),
-                            validator: (v) {
-                              if (v != null && v.trim().isNotEmpty) {
-                                if (double.tryParse(v.replaceAll(',', '.')) ==
-                                    null)
-                                  return 'Inválido';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Preço (R\$)',
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      validator: (v) {
+                        if (v != null && v.trim().isNotEmpty) {
+                          if (double.tryParse(v.replaceAll(',', '.')) ==
+                              null)
+                            return 'Inválido';
+                        }
+                        return null;
+                      },
                     ),
                   ],
                 ),
@@ -176,6 +217,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             ) ??
                             1.0,
                         unit: selectedUnit,
+                        category: selectedCategory,
                         price:
                             double.tryParse(
                               priceController.text.replaceAll(',', '.'),

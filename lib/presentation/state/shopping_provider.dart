@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart' hide Category;
-import '../../data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 import '../../domain/repositories/shopping_repository.dart';
 import '../../core/filter_enums.dart';
 import '../../core/globals.dart';
@@ -382,9 +382,7 @@ class ShoppingProvider with ChangeNotifier {
         bool updated = false;
         for (var j = 0; j < items.length; j++) {
           if (items[j].category?.id == id) {
-            items[j] = items[j].copyWithWrapped(
-              category: const Wrapped.value(null),
-            );
+            items[j] = items[j].clearCategory();
             updated = true;
           }
         }

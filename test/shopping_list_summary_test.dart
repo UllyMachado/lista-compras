@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lista_compras/data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 import 'package:lista_compras/presentation/widgets/shopping_list_summary.dart';
 import 'package:share_plus_platform_interface/share_plus_platform_interface.dart';
 

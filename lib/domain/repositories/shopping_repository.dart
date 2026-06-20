@@ -1,4 +1,4 @@
-import '../../data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 
 abstract class ShoppingRepository {
   Future<List<ShoppingList>> getLists();

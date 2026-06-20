@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 import '../state/shopping_provider.dart';
 import '../../core/theme.dart';
 import '../widgets/app_drawer.dart';
@@ -329,11 +329,6 @@ class _EditItemScreenState extends State<EditItemScreen> {
                             initialValue: _selectedUnit,
                             decoration: const InputDecoration(labelText: 'Unid.'),
                             items: ShoppingItemUnit.values
-                                .where(
-                                  (u) =>
-                                      u !=
-                                      ShoppingItemUnit.swaggerGeneratedUnknown,
-                                )
                                 .map((unit) {
                                   return DropdownMenuItem(
                                     value: unit,

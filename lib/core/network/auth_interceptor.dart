@@ -1,37 +1,31 @@
-import 'dart:async';
-import 'package:chopper/chopper.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/datasources/local/token_local_datasource.dart';
 import '../../data/datasources/remote/auth_remote_datasource.dart';
 import '../globals.dart';
 
-/// Chopper Interceptor that injects the Bearer token into every request
+/// Dio Interceptor that injects the Bearer token into every request
 /// and handles automatic token refresh on 401 responses.
-class AuthInterceptor implements Interceptor {
+class AuthInterceptor extends Interceptor {
   final TokenStorage _tokenStorage;
   final AuthService _authService;
   final VoidCallback _onAuthFailure;
+  final Dio _dio;
 
-  AuthInterceptor(this._tokenStorage, this._authService, this._onAuthFailure);
+  AuthInterceptor(this._tokenStorage, this._authService, this._onAuthFailure, this._dio);
 
   @override
-  FutureOr<Response<BodyType>> intercept<BodyType>(Chain<BodyType> chain) async {
-    var request = chain.request;
-    
-    // CRITICAL PATH: Retrieve the access token from secure storage.
-    // If it exists, append it as a 'Bearer' authorization header to the outbound request.
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final accessToken = await _tokenStorage.getAccessToken();
     if (accessToken != null && accessToken.isNotEmpty) {
-      request = applyHeader(request, 'Authorization', 'Bearer $accessToken');
+      options.headers['Authorization'] = 'Bearer $accessToken';
     }
+    handler.next(options);
+  }
 
-
-    // Proceed with the request
-    final response = await chain.proceed(request);
-
-    // SILENT REFRESH MECHANISM: If the server returns a 401 Unauthorized status,
-    // the current access token has likely expired. We attempt to refresh it.
-    if (response.statusCode == 401) {
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 401) {
       final refreshToken = await _tokenStorage.getRefreshToken();
       if (refreshToken != null && refreshToken.isNotEmpty) {
         try {
@@ -44,26 +38,27 @@ class AuthInterceptor implements Interceptor {
             newTokens.refreshToken,
           );
           
-          // 3. Clone and modify the failed request, injecting the brand new Access Token.
-          final newRequest = applyHeader(request, 'Authorization', 'Bearer ${newTokens.accessToken}');
+          // 3. Retry the request. The user won't notice any disruption.
+          final requestOptions = err.requestOptions;
+          requestOptions.headers['Authorization'] = 'Bearer ${newTokens.accessToken}';
           
-          // 4. Retry the request. The user won't notice any disruption.
-          return chain.proceed(newRequest);
+          final response = await _dio.fetch(requestOptions);
+          return handler.resolve(response);
         } catch (e) {
           // If refresh token has also expired/invalidated, clean storage and force logout.
           debugPrint('Token refresh failed: $e');
           await _tokenStorage.clearTokens();
           showErrorSnackBar('Sessão expirada. Por favor, faça login novamente.');
           _onAuthFailure();
+          return handler.next(err);
         }
       } else {
         // No refresh token available, force logout.
         _onAuthFailure();
+        return handler.next(err);
       }
     }
     
-    return response;
+    return handler.next(err);
   }
 }
-
-

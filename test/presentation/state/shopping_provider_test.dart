@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:lista_compras/domain/repositories/shopping_repository.dart';
 import 'package:lista_compras/presentation/state/shopping_provider.dart';
-import 'package:lista_compras/data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 import 'package:lista_compras/core/filter_enums.dart';
 
 class MockShoppingRepository extends Mock implements ShoppingRepository {}

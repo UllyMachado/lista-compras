@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../data/datasources/remote/api/openapi.swagger.dart';
+import 'package:lista_compras/data/models/models.dart';
 import '../../core/theme.dart';
 
 class ShoppingListSummary extends StatelessWidget {

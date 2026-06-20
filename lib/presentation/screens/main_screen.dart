@@ -1043,14 +1043,14 @@ class _MainScreenState extends State<MainScreen> {
                 Icons.list,
                 provider,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               _buildStatusChip(
                 'Comprados',
                 ItemStatusFilter.checked,
                 Icons.check_circle_outline,
                 provider,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               _buildStatusChip(
                 'Pendentes',
                 ItemStatusFilter.unchecked,
@@ -1113,7 +1113,7 @@ class _MainScreenState extends State<MainScreen> {
       onTap: () => provider.setStatusFilter(filter),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
               ? AppTheme.primary.withValues(alpha: 0.15)

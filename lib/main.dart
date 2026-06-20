@@ -6,7 +6,7 @@ import 'core/globals.dart';
 import 'core/router.dart';
 import 'presentation/state/auth_provider.dart';
 import 'presentation/state/shopping_provider.dart';
-import 'data/datasources/remote/api/openapi.swagger.dart';
+import 'package:dio/dio.dart';
 import 'data/datasources/remote/auth_remote_datasource.dart';
 import 'data/datasources/local/token_local_datasource.dart';
 import 'core/network/auth_interceptor.dart';
@@ -50,15 +50,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(
           create: (_) {
-            final api = Openapi.create(
-              baseUrl: Uri.parse(AppConfig.apiBaseUrl),
-              interceptors: [
-                AuthInterceptor(tokenStorage, authService, () {
-                  authProvider.logout();
-                }),
-              ],
+            final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+            dio.interceptors.add(
+              AuthInterceptor(tokenStorage, authService, () {
+                authProvider.logout();
+              }, dio),
             );
-            final shoppingRepository = ShoppingRepositoryImpl(api);
+            final shoppingRepository = ShoppingRepositoryImpl(dio);
             return ShoppingProvider(shoppingRepository);
           },
         ),
