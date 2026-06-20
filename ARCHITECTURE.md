@@ -6,7 +6,7 @@ Este documento detalha o design de software, os padrões de arquitetura, o fluxo
 
 ## 1. Diagrama de Camadas
 
-A arquitetura do sistema segue o princípio de **Separação de Preocupações (Separation of Concerns)**, organizando o fluxo de dados de forma unidirecional e protegendo a integridade da UI contra detalhes de rede ou banco de dados.
+A arquitetura do sistema segue o princípio de **Separação de Preocupações (Separation of Concerns)**, organizando o fluxo de dados de forma unidirecional e protegendo a integridade da UI contra detalhes de rede ou banco de dados. O servidor MCP atua como um canal adicional de entrada para que agentes e assistentes de IA gerenciem as listas de compras usando linguagem natural.
 
 ```mermaid
 graph TD
@@ -23,6 +23,12 @@ graph TD
         F[AuthInterceptor]
         G[TokenStorage - Secure Storage]
     end
+    subgraph IA ["Assistentes de IA"]
+        K[Claude Desktop / ChatGPT]
+    end
+    subgraph MCP ["Servidor MCP (Node.js)"]
+        L[MCP Server - Stdio / SSE]
+    end
     subgraph Backend ["Backend REST (Spring Boot)"]
         H[Controllers / Endpoints]
         I[Services / Business Logic]
@@ -38,6 +44,8 @@ graph TD
     F -->|Chama refresh| E
     D -->|HTTP Request| H
     E -->|HTTP Request| H
+    K -->|Protocolo MCP (JSON-RPC)| L
+    L -->|HTTP Request (Sem JWT)| H
     H -->|Delega| I
     I -->|Persiste| J
 ```
@@ -51,6 +59,7 @@ graph TD
     *   **AuthInterceptor:** Garante injeção transparente de cabeçalhos de segurança e atualização silenciosa da sessão.
     *   **TokenStorage:** Armazena os segredos localmente no dispositivo.
 4.  **Backend REST (Spring Boot):** Expõe recursos de listas de compras, itens e categorias, além de processamento inteligente de receitas.
+5.  **Servidor MCP (Node.js):** Canal de integração para IAs. Traduz comandos de linguagem natural do Claude/ChatGPT em chamadas HTTP para o Backend REST, expondo ferramentas para listar, criar, editar e excluir listas e itens de compras.
 
 ---
 
